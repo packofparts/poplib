@@ -19,4 +19,8 @@ public class BeamBreak {
     public BooleanSupplier getBlockedSupplier() {
         return () -> isBlocked();
     }
+
+    public BooleanSupplier getUnBlockedSupplier() {
+        return () -> !isBlocked();
+    }
 }

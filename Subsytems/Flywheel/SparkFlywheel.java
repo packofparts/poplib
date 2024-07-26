@@ -34,18 +34,6 @@ public class SparkFlywheel extends Flywheel {
         return MathUtil.getError(leadMotor, setpoint);
     }
 
-    public void updateSetpoint(double setpoint) {
-        this.setpoint.setDefault(setpoint);
-    }
-
-    public Command updateSetpointCommand(double setpoint) {
-        return runOnce(() -> this.setpoint.setDefault(setpoint));
-    }
-
-    public Command updateSetpointCommand(double setpoint, double maxError) {
-        return run(() -> this.setpoint.setDefault(setpoint)).until(() -> getError() < maxError);
-    }
-
     public void log() {
         SmartDashboard.putNumber(subsytemName + " velocity ", leadMotor.getEncoder().getVelocity());
     }
