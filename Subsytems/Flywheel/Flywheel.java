@@ -10,11 +10,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class Flywheel extends SubsystemBase {
-    protected final String subsytemName;
     protected final TunableNumber setpoint;
  
     protected Flywheel(String subsytemName, boolean tuningMode) {
-        this.subsytemName = subsytemName;
+        super(subsytemName);
         this.setpoint = new TunableNumber(subsytemName + " flywheel setpoint", 0, tuningMode);
     } 
 
