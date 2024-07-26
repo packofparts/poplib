@@ -13,6 +13,7 @@ public class PIDTuning {
     private final TunableNumber kI;
     private final TunableNumber kD;
     private final TunableNumber kF;
+    private final boolean tuningMode;
 
     public PIDTuning(String motorName, PIDConfig pid, boolean kTuningMode) {
         this(motorName, pid.P, pid.I, pid.D, pid.F, kTuningMode);
@@ -23,17 +24,20 @@ public class PIDTuning {
         kI = new TunableNumber(motorName + "kI", motor_kI, kTuningMode);
         kD = new TunableNumber(motorName + "kD", motor_kD, kTuningMode);
         kF = new TunableNumber(motorName + "kF", motor_kF, kTuningMode);
+        tuningMode = kTuningMode;
     }
 
     public void updatePID(CANSparkMax motor){
-        if (kP.hasChanged()) motor.getPIDController().setP(kP.get());
-        if (kI.hasChanged()) motor.getPIDController().setI(kI.get());
-        if (kD.hasChanged()) motor.getPIDController().setD(kD.get());
-        if (kF.hasChanged()) motor.getPIDController().setFF(kF.get());
+        if (tuningMode) {
+            if (kP.hasChanged()) motor.getPIDController().setP(kP.get());
+            if (kI.hasChanged()) motor.getPIDController().setI(kI.get());
+            if (kD.hasChanged()) motor.getPIDController().setD(kD.get());
+            if (kF.hasChanged()) motor.getPIDController().setFF(kF.get());
+        }
     }
 
     public void updatePID(TalonFX motor){
-        if (kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kF.hasChanged()) {
+        if ((kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kF.hasChanged()) && (tuningMode)) {
             Slot0Configs slot0Configs = new Slot0Configs();
             slot0Configs.kV = kF.get();
             slot0Configs.kP = kP.get();
