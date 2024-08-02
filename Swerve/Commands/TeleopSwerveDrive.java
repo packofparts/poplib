@@ -1,6 +1,7 @@
 package POPLib.Swerve.Commands;
 
 import POPLib.Controllers.ControllerMath;
+import POPLib.Controllers.OI;
 import POPLib.Swerve.SwerveTemplates.BaseSwerve;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,12 +30,35 @@ public class TeleopSwerveDrive extends Command {
             Supplier<Double> rotSupplier,
             double stickDeadBand) {
         this(
-                swerve,
-                xAxisSupplier,
-                yAxisSupplier,
-                rotSupplier,
-                () -> 1.0,
-                stickDeadBand);
+            swerve,
+            xAxisSupplier,
+            yAxisSupplier,
+            rotSupplier,
+            () -> 1.0,
+            stickDeadBand
+        );
+    }
+
+    public TeleopSwerveDrive(BaseSwerve swerve, OI oi) {
+        this(
+            swerve,
+            oi::getDriveTrainTranslationX,
+            oi::getDriveTrainTranslationY,
+            oi::getDriveTrainRotation,
+            () -> 1.0,
+            OI.DEADBAND
+        );
+    }
+
+    public TeleopSwerveDrive(BaseSwerve swerve, OI oi, Supplier<Double> rotSupplier) {
+        this(
+            swerve,
+            oi::getDriveTrainTranslationX,
+            oi::getDriveTrainTranslationY,
+            oi::getDriveTrainRotation,
+            rotSupplier,
+            OI.DEADBAND
+        );
     }
 
     /**
