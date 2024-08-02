@@ -48,14 +48,14 @@ public class SwerveModuleConstants {
     /**
      * Swerve Module Constants to be used when creating swerve modules.
      */
-    public SwerveModuleConstants(int moduleNumber, Rotation2d angleOffset, SDSModules moduleInfo,
-            boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig anglConfig) {
+    public SwerveModuleConstants(int moduleNumber, int driveMotorId, int cancoderId, int angleMotorId, Rotation2d angleOffset, SDSModules moduleInfo,
+            boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig angleConfig) {
         this.moduleNumber = moduleNumber;
         this.angleOffset = angleOffset;
 
-        driveMotorId = (moduleNumber * 3) + 1;
-        cancoderId = (moduleNumber * 3) + 2;
-        angleMotorId = (moduleNumber * 3) + 3;
+        this.driveMotorId = driveMotorId;
+        this.cancoderId = angleMotorId;
+        this.angleMotorId = angleMotorId;
 
         this.moduleInfo = moduleInfo;
 
@@ -65,21 +65,27 @@ public class SwerveModuleConstants {
         this.swerveTuningMode = swerveTuningMode;
 
         this.driveConfig = driveConfig;
-        this.angleConfig = anglConfig;
+        this.angleConfig = angleConfig;
+    }
+
+    public SwerveModuleConstants(int moduleNumber, Rotation2d angleOffset, SDSModules moduleInfo,
+        boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig angleConfig) {
+            this(moduleNumber,  (moduleNumber * 3) + 1, (moduleNumber * 3) + 2, (moduleNumber * 3) + 3, angleOffset, moduleInfo, swerveTuningMode, driveConfig, angleConfig);
     }
 
     public static SwerveModuleConstants[] generateConstants(Rotation2d[] angleOffsets, SDSModules moduleInfo,
-            boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig anglConfig) {
+            boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig angleConfig) {
         SwerveModuleConstants[] ret = new SwerveModuleConstants[4];
 
         for (int i = 0; i < 4; ++i) {
             ret[i] = new SwerveModuleConstants(
-                    i,
-                    angleOffsets[i],
-                    moduleInfo,
-                    swerveTuningMode,
-                    driveConfig,
-                    anglConfig);
+                i,
+                angleOffsets[i],
+                moduleInfo,
+                swerveTuningMode,
+                driveConfig,
+                angleConfig
+            );
         }
 
         return ret;

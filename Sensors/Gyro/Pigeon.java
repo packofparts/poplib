@@ -59,4 +59,9 @@ public class Pigeon extends Gyro {
         gyro.setYaw(newAngle.getDegrees()); 
     }
 
+    @Override
+    public double getAngularVelo() {
+        return gyro.getAngularVelocityZDevice().getValue();
+    }
+
 }

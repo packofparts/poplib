@@ -80,7 +80,7 @@ public class SwerveModuleNeoTalon extends SwerveModule {
 
     @Override
     public void updatePID(PIDTuning angle, PIDTuning drive) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updatePID'");
+        angle.updatePID(angleMotor);
+        drive.updatePID(driveMotor);
     }
 }

@@ -1,5 +1,7 @@
 package POPLib.Swerve.SwerveTemplates;
 
+import java.util.Arrays;
+import java.util.Collections;
 import POPLib.Sensors.Gyro.Gyro;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveModules.SwerveModule;
@@ -33,6 +35,8 @@ abstract public class BaseSwerve extends SubsystemBase {
     protected PIDTuning angleTuning;
     protected PIDTuning driveTuning;
 
+    public static final double GYRO_LATENCY_COMPENSTATION = 0.0;
+
     public BaseSwerve(SwerveModule[] swerveMods, Gyro gyro) {
         this.tuningMode = swerveMods[0].swerveModuleConstants.swerveTuningMode;
 
@@ -64,13 +68,7 @@ abstract public class BaseSwerve extends SubsystemBase {
     public abstract void driveRobotOriented(Translation2d vector, double rot);
 
     public void driveRobotOriented(SwerveModuleState[] states) {
-        // TODO: FIX SHITY CODE
-        // https://github.com/frc1678/C2023-Public/blob/main/src/main/java/com/team1678/lib/swerve/SwerveDriveKinematics.java
-        for (SwerveModuleState i : states) {
-            if (i.speedMetersPerSecond > maxSpeed) {
-                i.speedMetersPerSecond = maxSpeed;
-            }
-        }
+        desaturateWheelSpeeds(states, maxSpeed);
 
         for (SwerveModule i : swerveMods) {
             if (tuningMode) {
@@ -78,7 +76,19 @@ abstract public class BaseSwerve extends SubsystemBase {
                         states[i.swerveModuleConstants.moduleNumber].speedMetersPerSecond + ", "
                                 + states[i.swerveModuleConstants.moduleNumber].angle.getDegrees());
             }
+
             i.setDesiredState(states[i.swerveModuleConstants.moduleNumber]);
+        }
+    }
+
+    public void desaturateWheelSpeeds(SwerveModuleState[] states, double maxSpeed) {
+        double realMaxSpeed = Collections.max(Arrays.asList(states)).speedMetersPerSecond;
+
+        if (realMaxSpeed > maxSpeed) {
+            for (SwerveModuleState moduleState : states) {
+                moduleState.speedMetersPerSecond =
+                    (moduleState.speedMetersPerSecond / realMaxSpeed) * maxSpeed;
+            }
         }
     }
 
@@ -92,7 +102,7 @@ abstract public class BaseSwerve extends SubsystemBase {
         rot *= maxAngularVelocity;
 
         vector = vector.rotateBy(
-                        Rotation2d.fromRadians(getDriveVelo() * 0.0).plus(
+                        Rotation2d.fromRadians(gyro.getAngularVelo() * GYRO_LATENCY_COMPENSTATION).plus(
                                 Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0)).minus(gyro.getAngle())); // We are adding a value for
                                                                                            // latency conpensation,
                                                                                            // currently untuned
