@@ -100,6 +100,8 @@ public class MotorConfig {
         pid.setPid(motor);
    }
 
+   public MotorConfig getInvertedConfig() { return new MotorConfig(canId, canBus, currentLimit, !inversion, pid, mode); }
+
    public CANSparkMax createSparkMax() { return createSparkMax(CANSparkLowLevel.MotorType.kBrushless); }
 
    public CANSparkMax createSparkMax(CANSparkLowLevel.MotorType type) {

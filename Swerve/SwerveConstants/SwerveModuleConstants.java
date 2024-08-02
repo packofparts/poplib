@@ -91,6 +91,50 @@ public class SwerveModuleConstants {
         return ret;
     }
 
+    public static SwerveModuleConstants[] generateConstants(Rotation2d[] angleOffsets,Boolean[] flippedModules, Integer[] canIds, SDSModules moduleInfo,
+            boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig angleConfig) {
+        SwerveModuleConstants[] ret = new SwerveModuleConstants[4];
+
+        MotorConfig invertedDrive = driveConfig.getInvertedConfig();
+        MotorConfig invertedAngle = angleConfig.getInvertedConfig();
+        for (int i = 0; i < 4; ++i) {
+            ret[i] = new SwerveModuleConstants(
+                i,
+                canIds[i*3],
+                canIds[i*3+1],
+                canIds[i*3+2],
+                angleOffsets[i],
+                moduleInfo,
+                swerveTuningMode,
+                flippedModules[i] ? invertedDrive : driveConfig,
+                flippedModules[i] ? invertedAngle : angleConfig
+            );
+        }
+
+        return ret;
+    }
+
+    public static SwerveModuleConstants[] generateConstants(Rotation2d[] angleOffsets, Integer[] canIds, SDSModules moduleInfo,
+    boolean swerveTuningMode, MotorConfig driveConfig, MotorConfig angleConfig) {
+        SwerveModuleConstants[] ret = new SwerveModuleConstants[4];
+
+        for (int i = 0; i < 4; ++i) {
+            ret[i] = new SwerveModuleConstants(
+                i,
+                canIds[i*3],
+                canIds[i*3+1],
+                canIds[i*3+2],
+                angleOffsets[i],
+                moduleInfo,
+                swerveTuningMode,
+                driveConfig,
+                angleConfig
+            );
+        }
+
+        return ret;
+        }
+
     public CANSparkMax getDriveNeo() {
         CANSparkMax neo = new CANSparkMax(driveMotorId, MotorType.kBrushless);
         driveConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
