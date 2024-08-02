@@ -1,10 +1,5 @@
 package POPLib.Subsytems.Flywheel;
 
-import com.ctre.phoenix6.signals.Led1OffColorValue;
-import com.revrobotics.CANSparkBase.ControlType;
-import POPLib.Control.PIDConfig;
-import POPLib.Motor.MotorConfig;
-import POPLib.SmartDashboard.PIDTuning;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

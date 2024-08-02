@@ -8,7 +8,6 @@ import POPLib.Motor.MotorConfig;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 
 public class SparkFlywheel extends Flywheel {
     CANSparkMax leadMotor; 
