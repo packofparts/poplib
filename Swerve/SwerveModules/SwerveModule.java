@@ -31,6 +31,10 @@ public abstract class SwerveModule {
     abstract protected double getPositionMeter();
     abstract protected double getVelocityMeter();
 
+    public double getPositionRotationRadians() {
+        return (getPositionMeter() / SwerveModuleConstants.wheelCircumference) * 2 * Math.PI;
+    }
+
     public void log() {}
 
     abstract public void updatePID(PIDTuning angle, PIDTuning drive);

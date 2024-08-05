@@ -104,8 +104,10 @@ abstract public class BaseSwerve extends SubsystemBase {
         vector = vector.rotateBy(
                         Rotation2d.fromRadians(gyro.getAngularVelo() * GYRO_LATENCY_COMPENSTATION).plus(
                                 Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0)).minus(gyro.getAngle())); // We are adding a value for
-                                                                                           // latency conpensation,
-                                                                                           // currently untuned
+                                                                                        //    latency conpensation,
+                                                                                        //    currently untuned
+
+        // vector = vector.rotateBy(Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0).minus(gyro.getLatencyCompensatedAngle())); //TODO: TEST
 
         driveRobotOriented(vector, rot);
     }
@@ -117,7 +119,7 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public SwerveModulePosition[] getPose() {
-        SwerveModulePosition[] ret = new SwerveModulePosition[] { null, null, null, null };
+        SwerveModulePosition[] ret = new SwerveModulePosition[4];
 
         for (SwerveModule i : swerveMods) {
             ret[i.swerveModuleConstants.moduleNumber] = i.getPose();
@@ -126,8 +128,18 @@ abstract public class BaseSwerve extends SubsystemBase {
         return ret;
     }
 
+    public double[] getPoseRotationsRadians() {
+        double[] ret = new double[4];
+
+        for (SwerveModule i : swerveMods) {
+            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionRotationRadians();
+        }
+
+        return ret;
+    }
+
     public SwerveModuleState[] getStates() {
-        SwerveModuleState[] ret = new SwerveModuleState[] { null, null, null, null };
+        SwerveModuleState[] ret = new SwerveModuleState[4];
 
         for (SwerveModule i : swerveMods) {
             ret[i.swerveModuleConstants.moduleNumber] = i.getState();
