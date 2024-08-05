@@ -18,4 +18,5 @@ public abstract class Gyro {
 
     public abstract double getYaw();
 
+    public abstract double getAngularVelo();
 }

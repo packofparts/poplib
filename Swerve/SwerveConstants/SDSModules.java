@@ -2,7 +2,7 @@ package POPLib.Swerve.SwerveConstants;
 
 public enum SDSModules {
     MK4i((150.0 / 7.0), 6.12, 5.6, 4, 2 * Math.PI, 4),
-    MK4(0, 0, 0, 0,0,0);
+    MK4(12.8, 6.12, 5.21208, 4,2 * Math.PI,4);
 
     public double angleGearRatio;
     public double driveGearRatio;

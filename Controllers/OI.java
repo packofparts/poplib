@@ -10,6 +10,8 @@ public class OI {
     private CommandXboxController driverController;
     private CommandXboxController operatorController;
 
+    public static final double DEADBAND = 0.1;
+
     private static OI instance;
 
 

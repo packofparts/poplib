@@ -63,6 +63,7 @@ public class SwerveModuleNeo extends SwerveModule {
 
     @Override
     public void updatePID(PIDTuning angle, PIDTuning drive) {
-        throw new UnsupportedOperationException("Unimplemented method 'updatePID'");
+        angle.updatePID(angleMotor);
+        drive.updatePID(driveMotor);
     }
 }

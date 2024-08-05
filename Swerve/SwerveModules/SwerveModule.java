@@ -21,14 +21,17 @@ public abstract class SwerveModule {
         lastAngle = Rotation2d.fromDegrees(0);
     }
 
+    // Resets swerve module to the cancoder angle
     abstract public void resetToAbsolute();
 
-    public void log() {}
-
+    // Sets swerve module to swerve module state
     abstract protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians);
+
     abstract protected Rotation2d getEncoderAngle();
     abstract protected double getPositionMeter();
     abstract protected double getVelocityMeter();
+
+    public void log() {}
 
     abstract public void updatePID(PIDTuning angle, PIDTuning drive);
 
