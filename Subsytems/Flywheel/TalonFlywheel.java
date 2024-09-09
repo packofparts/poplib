@@ -41,6 +41,10 @@ public class TalonFlywheel extends Flywheel {
         SmartDashboard.putNumber(getName() + " velocity ", leadMotor.getVelocity().getValueAsDouble());
     }
 
+    public double getVelocity() {
+        return leadMotor.getVelocity().getValueAsDouble();
+    }
+
     @Override
     public void periodic() {
         leadPidTuning.updatePID(leadMotor);
