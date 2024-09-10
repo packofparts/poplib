@@ -11,8 +11,8 @@ import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TalonFlywheel extends Flywheel {
-    TalonFX leadMotor; 
-    TalonFX followerMotor; 
+    public TalonFX leadMotor; 
+    public TalonFX followerMotor; 
  
     TunableNumber setpoint;
     PIDTuning leadPidTuning;
