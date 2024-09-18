@@ -153,6 +153,11 @@ public class SwerveModuleConstants {
         CANSparkMax neo = new CANSparkMax(angleMotorId, MotorType.kBrushless);
         angleConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
         MotorHelper.setDegreeConversionFactor(neo, moduleInfo.angleGearRatio);
+
+        neo.getPIDController().setPositionPIDWrappingEnabled(true);
+        neo.getPIDController().setPositionPIDWrappingMinInput(0);
+        neo.getPIDController().setPositionPIDWrappingMinInput(360);
+
         return neo;
     }
 

@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SparkFlywheel extends Flywheel {
     CANSparkMax leadMotor; 
     CANSparkMax followerMotor; 
-    String subsytemName;
     TunableNumber setpoint;
     PIDTuning leadPidTuning;
  
@@ -34,7 +33,7 @@ public class SparkFlywheel extends Flywheel {
     }
 
     public void log() {
-        SmartDashboard.putNumber(subsytemName + " velocity ", leadMotor.getEncoder().getVelocity());
+        SmartDashboard.putNumber(getName() + " velocity ", leadMotor.getEncoder().getVelocity());
     }
 
     @Override

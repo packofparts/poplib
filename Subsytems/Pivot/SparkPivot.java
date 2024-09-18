@@ -19,14 +19,14 @@ public class SparkPivot extends Pivot {
         leadMotor = leadConfig.createSparkMax();
         followerMotor = followerConfig.createSparkMax();
         
-        MotorHelper.setConversionFactor(leadMotor, gearRatio);
-        MotorHelper.setConversionFactor(followerMotor,gearRatio);
+        MotorHelper.setDegreeConversionFactor(leadMotor, gearRatio);
+        MotorHelper.setDegreeConversionFactor(followerMotor,gearRatio);
 
-        leadMotor.follow(followerMotor, invertedMotors);
+        followerMotor.follow(leadMotor, invertedMotors);
 
         pid = leadConfig.genPIDTuning("Pivot Motor " + subsytemName, tuningMode);
 
-        resetToAbsolutePosition();;
+        resetToAbsolutePosition();
     }
 
     public boolean atSetpoint(double error) {
@@ -34,25 +34,24 @@ public class SparkPivot extends Pivot {
     }
 
     public double getError() {
-        return Math.abs(followerMotor.getEncoder().getPosition() - setpoint.get());
+        return Math.abs(leadMotor.getEncoder().getPosition() - setpoint.get());
     }
 
     @Override
     public void log() {
         super.log();
-        SmartDashboard.putNumber("Lead Position " + getName(), followerMotor.getEncoder().getPosition());
-
+        SmartDashboard.putNumber("Lead Position " + getName(), leadMotor.getEncoder().getPosition());
     }
 
     @Override
     public void periodic() {
-        pid.updatePID(followerMotor);
+        pid.updatePID(leadMotor);
 
-        followerMotor.getPIDController().setReference(
+        leadMotor.getPIDController().setReference(
             setpoint.get(), 
             ControlType.kPosition,
             0,
-            ff.calculate(Math.toRadians(followerMotor.getEncoder().getPosition()), 0)
+            ff.calculate(Math.toRadians(leadMotor.getEncoder().getPosition()), 0)
         );
     }
 

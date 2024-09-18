@@ -1,5 +1,6 @@
 package POPLib.Math;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoder;
@@ -31,6 +32,10 @@ public class MathUtil {
 
    public static double getError(CANSparkMax target, TunableNumber setpoint) {
     return getError(target.getEncoder().getPosition(), setpoint.get());
+   }
+
+   public static double getError(TalonFX target, TunableNumber setpoint) {
+    return getError(target.getPosition().getValueAsDouble(), setpoint.get());
    }
 
    public static double getError(CANSparkMax target, AbsoluteEncoder setpoint) {

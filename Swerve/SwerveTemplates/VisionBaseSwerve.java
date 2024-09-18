@@ -50,8 +50,11 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
 
     @Override
     public void driveRobotOriented(Translation2d vector, double rot) {
+        // vector = accelrationLimit(vector);
+
         SwerveModuleState[] states = kinematics
                 .toSwerveModuleStates(new ChassisSpeeds(vector.getX(), vector.getY(), rot));
+
         driveRobotOriented(states);
     }
 

@@ -2,16 +2,19 @@ package POPLib.Swerve.SwerveTemplates;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.DelayQueue;
 import POPLib.Sensors.Gyro.Gyro;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveModules.SwerveModule;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,7 +38,13 @@ abstract public class BaseSwerve extends SubsystemBase {
     protected PIDTuning angleTuning;
     protected PIDTuning driveTuning;
 
+    private Translation2d lastTranslationVector;
+    private double lastTranslationVectorTime;
+
     public static final double GYRO_LATENCY_COMPENSTATION = 0.0;
+    public static final double MAX_SKID_ACCEL = 100.0;
+    public static final double MAX_X_TILT_ACCEL = 100.0;    
+    public static final double MAX_Y_TILT_ACCEL = 0.5;
 
     public BaseSwerve(SwerveModule[] swerveMods, Gyro gyro) {
         this.tuningMode = swerveMods[0].swerveModuleConstants.swerveTuningMode;
@@ -49,6 +58,9 @@ abstract public class BaseSwerve extends SubsystemBase {
 
         this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed;
         this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity;
+
+        lastTranslationVector = new Translation2d();
+        lastTranslationVectorTime = Timer.getFPGATimestamp();
 
         angleTuning = new PIDTuning("Swerve Angle", swerveMods[0].swerveModuleConstants.angleConfig.pid,  swerveMods[0].swerveModuleConstants.swerveTuningMode);
         driveTuning = new PIDTuning("Swerve Drive",  swerveMods[0].swerveModuleConstants.driveConfig.pid,  swerveMods[0].swerveModuleConstants.swerveTuningMode);
@@ -66,6 +78,28 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public abstract void driveRobotOriented(Translation2d vector, double rot);
+
+    public Translation2d accelrationLimit(Translation2d wantedVelcotiy) {
+        Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
+        double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
+        lastTranslationVectorTime += ellapsedTime;
+        
+        if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
+            delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
+        }
+
+        if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
+            delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
+        }
+
+        if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
+            delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
+        }
+
+        lastTranslationVector = delta;
+
+        return delta;
+    }
 
     public void driveRobotOriented(SwerveModuleState[] states) {
         desaturateWheelSpeeds(states, maxSpeed);
@@ -104,8 +138,10 @@ abstract public class BaseSwerve extends SubsystemBase {
         vector = vector.rotateBy(
                         Rotation2d.fromRadians(gyro.getAngularVelo() * GYRO_LATENCY_COMPENSTATION).plus(
                                 Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0)).minus(gyro.getAngle())); // We are adding a value for
-                                                                                           // latency conpensation,
-                                                                                           // currently untuned
+                                                                                        //    latency conpensation,
+                                                                                        //    currently untuned
+
+        // vector = vector.rotateBy(Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0).minus(gyro.getLatencyCompensatedAngle())); //TODO: TEST
 
         driveRobotOriented(vector, rot);
     }
@@ -117,7 +153,7 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public SwerveModulePosition[] getPose() {
-        SwerveModulePosition[] ret = new SwerveModulePosition[] { null, null, null, null };
+        SwerveModulePosition[] ret = new SwerveModulePosition[4];
 
         for (SwerveModule i : swerveMods) {
             ret[i.swerveModuleConstants.moduleNumber] = i.getPose();
@@ -126,8 +162,18 @@ abstract public class BaseSwerve extends SubsystemBase {
         return ret;
     }
 
+    public double[] getPoseRotationsRadians() {
+        double[] ret = new double[4];
+
+        for (SwerveModule i : swerveMods) {
+            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionRotationRadians();
+        }
+
+        return ret;
+    }
+
     public SwerveModuleState[] getStates() {
-        SwerveModuleState[] ret = new SwerveModuleState[] { null, null, null, null };
+        SwerveModuleState[] ret = new SwerveModuleState[4];
 
         for (SwerveModule i : swerveMods) {
             ret[i.swerveModuleConstants.moduleNumber] = i.getState();

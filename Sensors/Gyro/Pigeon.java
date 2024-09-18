@@ -1,5 +1,6 @@
 package POPLib.Sensors.Gyro;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
@@ -62,6 +63,16 @@ public class Pigeon extends Gyro {
     @Override
     public double getAngularVelo() {
         return gyro.getAngularVelocityZDevice().getValue();
+    }
+
+
+    @Override
+    public Rotation2d getLatencyCompensatedAngle() {
+        double yaw = BaseStatusSignal.getLatencyCompensatedValue(gyro.getYaw().refresh(), gyro.getAngularVelocityZDevice().refresh());;
+
+        return inversion 
+            ? Rotation2d.fromDegrees(MathUtil.inputModulus(360 - yaw, 0, 360))
+            : Rotation2d.fromDegrees(MathUtil.inputModulus(yaw, 0, 360));
     }
 
 }

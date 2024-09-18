@@ -2,6 +2,7 @@ package POPLib.Controllers;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /** 
  * Handels xbox controllers.
@@ -60,7 +61,15 @@ public class OI {
         return driverController;
     }
 
+    public Trigger getDriverButton(int id) {
+        return getDriverController().button(id);
+    }
+
     public CommandXboxController getOperatorController() {
         return operatorController;
+    }
+
+    public Trigger getOperatorButton(int id) {
+        return getOperatorController().button(id);
     }
 }
