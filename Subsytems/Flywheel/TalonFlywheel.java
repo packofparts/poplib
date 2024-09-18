@@ -14,8 +14,8 @@ public class TalonFlywheel extends Flywheel {
     public TalonFX leadMotor; 
     public TalonFX followerMotor; 
  
-    TunableNumber setpoint;
-    PIDTuning leadPidTuning;
+    public TunableNumber setpoint;
+    public PIDTuning leadPidTuning;
 
     VelocityDutyCycle velocity;
  
