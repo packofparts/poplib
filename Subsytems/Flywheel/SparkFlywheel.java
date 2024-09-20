@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SparkFlywheel extends Flywheel {
     CANSparkMax leadMotor; 
     CANSparkMax followerMotor; 
-    TunableNumber setpoint;
     PIDTuning leadPidTuning;
  
     protected SparkFlywheel(MotorConfig leadConfig, MotorConfig followerConfig, String subsytemName, boolean tuningMode, boolean motorsInverted) {
@@ -25,7 +24,6 @@ public class SparkFlywheel extends Flywheel {
 
         followerMotor.follow(leadMotor, motorsInverted);
 
-        this.setpoint = new TunableNumber(subsytemName + " flywheel setpoint", 0, tuningMode);
     } 
 
     public double getError() {

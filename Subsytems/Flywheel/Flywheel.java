@@ -23,6 +23,9 @@ public abstract class Flywheel extends SubsystemBase {
     }
 
     public Command updateSetpointCommand(double setpoint, double maxError) {
-        return run(() -> this.setpoint.setDefault(setpoint)).until(() -> getError() < maxError);
+        return run(() -> { 
+            this.setpoint.setDefault(setpoint);
+            System.out.println("Setting setpoint to: " + setpoint);
+        }).until(() -> getError() < maxError);
     }
 }

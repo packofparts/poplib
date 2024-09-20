@@ -14,7 +14,6 @@ public class TalonFlywheel extends Flywheel {
     public TalonFX leadMotor; 
     public TalonFX followerMotor; 
  
-    public TunableNumber setpoint;
     public PIDTuning leadPidTuning;
 
     VelocityDutyCycle velocity;
@@ -28,13 +27,12 @@ public class TalonFlywheel extends Flywheel {
         this.leadPidTuning = new PIDTuning(subsytemName + " flywheel", PIDConfig.getZeroPid(), tuningMode);
 
         this.velocity = new VelocityDutyCycle(0.0);
-        this.setpoint = new TunableNumber(subsytemName + " flywheel setpoint", 0, tuningMode);
 
         followerMotor.setControl(new Follower(leadConfig.canId, motorsInverted));
     } 
 
     public double getError() {
-        return MathUtil.getError(leadMotor, setpoint);
+        return Math.abs(leadMotor.getVelocity().getValueAsDouble() - setpoint.get());
     }
 
     public void log() {
