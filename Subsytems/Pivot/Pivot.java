@@ -25,10 +25,10 @@ public abstract class Pivot extends SubsystemBase {
     public Command moveWrist(double position, double error) {
         return run(() -> {
             setpoint.setDefault(position);
-        }).until(() -> atSetpoint(error));
+        }).until(() -> atSetpoint(error, position));
     }
 
-    public abstract boolean atSetpoint(double error);
+    public abstract boolean atSetpoint(double error, double setpoint);
 
     public abstract void resetToAbsolutePosition();
 

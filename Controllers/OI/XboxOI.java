@@ -66,6 +66,10 @@ public class XboxOI extends OI {
         return getDriverController().button(id);
     }
 
+    public Trigger getDriverTrigger(int id) {
+        return getDriverController().axisGreaterThan(id, 0.5);
+    }
+
     // public abstract CommandGenericHID getOperatorController();
 
     public Trigger getOperatorButton(int id) {
