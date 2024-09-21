@@ -26,7 +26,7 @@ public class SparkFlywheel extends Flywheel {
 
     } 
 
-    public double getError() {
+    public double getError(double setpoint) {
         return MathUtil.getError(leadMotor, setpoint);
     }
 

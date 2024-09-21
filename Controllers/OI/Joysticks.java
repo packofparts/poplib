@@ -30,7 +30,7 @@ public class Joysticks extends OI {
         public static final int OPERATOR_PORT = 2;
     }
 
-    private void JoystickOI() {
+    public Joysticks() {
         driveJoystick = new CommandJoystick(OIConstants.DRIVE_PORT);
         transJoystick = new CommandJoystick(1);
         operatorController = new CommandXboxController(OIConstants.OPERATOR_PORT);

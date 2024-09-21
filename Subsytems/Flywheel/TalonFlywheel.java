@@ -31,8 +31,8 @@ public class TalonFlywheel extends Flywheel {
         followerMotor.setControl(new Follower(leadConfig.canId, motorsInverted));
     } 
 
-    public double getError() {
-        return Math.abs(leadMotor.getVelocity().getValueAsDouble() - setpoint.get());
+    public double getError(double setpoint) {
+        return Math.abs(leadMotor.getVelocity().getValueAsDouble() - setpoint);
     }
 
     public void log() {
