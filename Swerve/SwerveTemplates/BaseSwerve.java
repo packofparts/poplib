@@ -80,25 +80,25 @@ abstract public class BaseSwerve extends SubsystemBase {
     public abstract void driveRobotOriented(Translation2d vector, double rot);
 
     public Translation2d accelrationLimit(Translation2d wantedVelcotiy) {
-        Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
-        double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
-        lastTranslationVectorTime += ellapsedTime;
+        // Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
+        // double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
+        // lastTranslationVectorTime += ellapsedTime;
         
-        if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
-            delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
-        }
+        // if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
+        //     delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
+        // }
 
-        if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
-            delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
-        }
+        // if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
+        //     delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
+        // }
 
-        if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
-            delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
-        }
+        // if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
+        //     delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
+        // }
 
-        lastTranslationVector = delta;
+        // lastTranslationVector = delta;
 
-        return delta;
+        return null;
     }
 
     public void driveRobotOriented(SwerveModuleState[] states) {

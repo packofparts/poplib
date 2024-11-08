@@ -29,12 +29,12 @@ public class SparkPivot extends Pivot {
         resetToAbsolutePosition();
     }
 
-    public boolean atSetpoint(double error) {
-        return getError() < error;
+    public boolean atSetpoint(double error, double setpoint) {
+        return getError(setpoint) < error;
     }
 
-    public double getError() {
-        return Math.abs(leadMotor.getEncoder().getPosition() - setpoint.get());
+    public double getError(double setpoint) {
+        return Math.abs(leadMotor.getEncoder().getPosition() - setpoint);
     }
 
     @Override

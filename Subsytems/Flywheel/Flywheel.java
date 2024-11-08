@@ -12,7 +12,7 @@ public abstract class Flywheel extends SubsystemBase {
         this.setpoint = new TunableNumber(subsytemName + " flywheel setpoint", 0, tuningMode);
     } 
 
-    public abstract double getError();
+    public abstract double getError(double setpoint);
  
     public void updateSetpoint(double setpoint) {
         this.setpoint.setDefault(setpoint);
@@ -23,6 +23,9 @@ public abstract class Flywheel extends SubsystemBase {
     }
 
     public Command updateSetpointCommand(double setpoint, double maxError) {
-        return run(() -> this.setpoint.setDefault(setpoint)).until(() -> getError() < maxError);
+        return run(() -> { 
+            this.setpoint.setDefault(setpoint);
+            System.out.println("Setting setpoint to: " + setpoint);
+        }).until(() -> getError(setpoint) < maxError);
     }
 }

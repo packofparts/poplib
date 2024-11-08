@@ -1,7 +1,7 @@
 package POPLib.Swerve.Commands;
 
 import POPLib.Controllers.ControllerMath;
-import POPLib.Controllers.OI;
+import POPLib.Controllers.OI.OI;
 import POPLib.Swerve.SwerveTemplates.BaseSwerve;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;

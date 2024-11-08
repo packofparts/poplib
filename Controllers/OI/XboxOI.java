@@ -1,20 +1,24 @@
-package POPLib.Controllers;
+package POPLib.Controllers.OI;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-/** 
- * Handels xbox controllers.
-*/
-public class OI {
+public class XboxOI extends OI {
     private CommandXboxController driverController;
     private CommandXboxController operatorController;
 
-    public static final double DEADBAND = 0.1;
+    // public static XboxOI instance = null;
 
-    private static OI instance;
+    // public static XboxOI getInstance() {
+    //     if (instance == null) {
+    //         instance = new XboxOI();
+    //     }
 
+    //     return instance;
+    // }
 
     public static final class OIConstants  {
         public static final int DRIVE_TRANSLATION_Y = XboxController.Axis.kLeftY.value;
@@ -26,21 +30,12 @@ public class OI {
         public static final int OPERATOR_PORT = 1;
     }
 
-    /**
-     * Makes class a singelton.
-     */
-    public static OI getInstance() {
-        if (instance == null) {
-            instance = new OI();
-        }
-        return instance;
-    }
-
-    private OI() {
+    public XboxOI() {
         driverController = new CommandXboxController(OIConstants.DRIVE_PORT);
         operatorController = new CommandXboxController(OIConstants.OPERATOR_PORT);
-
     }
+
+
     public double getDriveTrainRotation() {
         return getRawAxis(OIConstants.DRIVE_ROTATE);
     }
@@ -53,21 +48,29 @@ public class OI {
         return getRawAxis(OIConstants.DRIVE_TRANSLATION_X);
     }
 
-    private double getRawAxis(int id) {
-        return driverController.getHID().getRawAxis(id) * -1;
-    }
-
-    public CommandXboxController getDriverController() {
+    public CommandGenericHID getDriverController() {
         return driverController;
     }
+
+    public CommandGenericHID getOperatorController() {
+        return operatorController;
+    }
+
+    protected double getRawAxis(int id) {
+        return getDriverController().getHID().getRawAxis(id) * -1;
+    }
+
+    // public abstract CommandGenericHID getDriverController();
 
     public Trigger getDriverButton(int id) {
         return getDriverController().button(id);
     }
 
-    public CommandXboxController getOperatorController() {
-        return operatorController;
+    public Trigger getDriverTrigger(int id) {
+        return getDriverController().axisGreaterThan(id, 0.5);
     }
+
+    // public abstract CommandGenericHID getOperatorController();
 
     public Trigger getOperatorButton(int id) {
         return getOperatorController().button(id);
