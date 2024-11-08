@@ -1,0 +1,23 @@
+package POPLib.Motor;
+
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.CANSparkBase.IdleMode;
+
+public enum Mode {
+    COAST(true),
+    BRAKE(false);
+
+    private boolean mode;
+
+    private Mode(boolean mode) {
+        this.mode = mode;
+    }
+
+    public NeutralModeValue getTalonMode() {
+        return mode ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    }
+
+    public IdleMode getSparkMaxMode() {
+        return mode ? IdleMode.kCoast : IdleMode.kBrake;
+    }
+};
