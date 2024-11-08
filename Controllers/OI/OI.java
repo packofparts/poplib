@@ -1,19 +1,15 @@
 package POPLib.Controllers.OI;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /** 
- * Handels xbox controllers.
+ * Abstract class for OI control
 */
 abstract public class OI {
     public static final double DEADBAND = 0.1;
 
-    public OI() {
-    }
-
+    public OI() { }
 
     public abstract double getDriveTrainRotation();
 
@@ -21,19 +17,26 @@ abstract public class OI {
 
     public abstract double getDriveTrainTranslationX();
 
-    // protected double getRawAxis(int id) {
-    //     return getDriverController().getHID().getRawAxis(id) * -1;
-    // }
+    public abstract CommandGenericHID getDriverController();
+    public abstract CommandGenericHID getOperatorController();
 
-    // // public abstract CommandGenericHID getDriverController();
+    protected double getRawAxis(int id, CommandGenericHID controller) {
+        return controller.getHID().getRawAxis(id) * -1;
+    }
 
-    // public Trigger getDriverButton(int id) {
-    //     return getDriverController().button(id);
-    // }
+    public Trigger getDriverButton(int id) {
+        return getDriverController().button(id);
+    }
 
-    // // public abstract CommandGenericHID getOperatorController();
+    public Trigger getDriverTrigger(int id) {
+        return getDriverController().axisGreaterThan(id, 0.5);
+    }
 
-    // public Trigger getOperatorButton(int id) {
-    //     return getOperatorController().button(id);
-    // }
+    public Trigger getOperatorButton(int id) {
+        return getOperatorController().button(id);
+    }
+
+    public Trigger getOperatorrigger(int id) {
+        return getOperatorController().axisGreaterThan(id, 0.5);
+    }
 }

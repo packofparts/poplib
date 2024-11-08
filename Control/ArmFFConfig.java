@@ -18,5 +18,4 @@ public class ArmFFConfig {
     public ArmFeedforward getArmFeedforward() {
         return new ArmFeedforward(S, G, V);
     }
-    
 }
