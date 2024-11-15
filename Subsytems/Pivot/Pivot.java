@@ -1,7 +1,7 @@
 package POPLib.Subsytems.Pivot;
 
 import POPLib.Control.ArmFFConfig;
-import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoder;
+import POPLib.Sensors.AbsoluteEncoder.DutyCycleAbsoluteEncoder;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class Pivot extends SubsystemBase {
-    protected final AbsoluteEncoder absoluteEncoder;
+    protected final DutyCycleAbsoluteEncoder absoluteEncoder;
     protected final ArmFeedforward ff;
     protected final TunableNumber setpoint;
 
@@ -33,7 +33,7 @@ public abstract class Pivot extends SubsystemBase {
     public abstract void resetToAbsolutePosition();
 
     public double getAbsolutePosition() {
-        return absoluteEncoder.getPosition();
+        return absoluteEncoder.getDegreePosition();
     }
 
     public void log() {

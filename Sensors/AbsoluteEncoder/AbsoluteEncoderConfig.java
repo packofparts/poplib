@@ -11,8 +11,8 @@ public class AbsoluteEncoderConfig {
         this.inversion = inversion;
     }
 
-    public AbsoluteEncoder generateAbsoluteEncoder() {
-        return new AbsoluteEncoder(id, offset, inversion);
+    public DutyCycleAbsoluteEncoder generateAbsoluteEncoder() {
+        return new DutyCycleAbsoluteEncoder(id, offset, inversion);
     }
 
 }

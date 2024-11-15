@@ -3,7 +3,7 @@ package POPLib.Math;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 
-import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoder;
+import POPLib.Sensors.AbsoluteEncoder.DutyCycleAbsoluteEncoder;
 import POPLib.SmartDashboard.TunableNumber;
 
 
@@ -38,7 +38,7 @@ public class MathUtil {
         return getError(target.getPosition().getValueAsDouble(), setpoint.get());
     }
 
-    public static double getError(CANSparkMax target, AbsoluteEncoder setpoint) {
-        return getError(target.getEncoder().getPosition(), setpoint.getNormalizedPosition());
+    public static double getError(CANSparkMax target, DutyCycleAbsoluteEncoder setpoint) {
+        return getError(target.getEncoder().getPosition(), setpoint.getDegreeNormalizedPosition());
     }
 }
