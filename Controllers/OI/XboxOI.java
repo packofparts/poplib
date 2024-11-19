@@ -1,10 +1,8 @@
 package POPLib.Controllers.OI;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class XboxOI extends OI {
     private CommandXboxController driverController;

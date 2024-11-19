@@ -2,11 +2,9 @@ package POPLib.Subsytems.Flywheel;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.ControlType;
-import POPLib.Control.PIDConfig;
 import POPLib.Math.MathUtil;
 import POPLib.Motor.MotorConfig;
 import POPLib.SmartDashboard.PIDTuning;
-import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SparkFlywheel extends Flywheel {
@@ -20,10 +18,7 @@ public class SparkFlywheel extends Flywheel {
         this.leadMotor = leadConfig.createSparkMax();
         this.followerMotor = followerConfig.createSparkMax();
 
-        this.leadPidTuning = new PIDTuning(subsytemName + " flywheel", PIDConfig.getZeroPid(), tuningMode);
-
         followerMotor.follow(leadMotor, motorsInverted);
-
     } 
 
     public double getError(double setpoint) {

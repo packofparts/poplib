@@ -15,7 +15,6 @@ import POPLib.Motor.MotorConfig;
 import POPLib.Motor.MotorHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 /**

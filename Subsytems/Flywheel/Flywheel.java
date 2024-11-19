@@ -1,15 +1,20 @@
 package POPLib.Subsytems.Flywheel;
 
+import POPLib.Control.PIDConfig;
+import POPLib.SmartDashboard.PIDTuning;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class Flywheel extends SubsystemBase {
     protected final TunableNumber setpoint;
+    protected PIDTuning leadPidTuning;
  
     protected Flywheel(String subsytemName, boolean tuningMode) {
         super(subsytemName);
         this.setpoint = new TunableNumber(subsytemName + " flywheel setpoint", 0, tuningMode);
+
+        this.leadPidTuning = new PIDTuning(subsytemName + " flywheel", PIDConfig.getZeroPid(), tuningMode);
     } 
 
     public abstract double getError(double setpoint);
@@ -25,7 +30,6 @@ public abstract class Flywheel extends SubsystemBase {
     public Command updateSetpointCommand(double setpoint, double maxError) {
         return run(() -> { 
             this.setpoint.setDefault(setpoint);
-            System.out.println("Setting setpoint to: " + setpoint);
         }).until(() -> getError(setpoint) < maxError);
     }
 }

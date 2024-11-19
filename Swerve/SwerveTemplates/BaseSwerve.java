@@ -2,12 +2,10 @@ package POPLib.Swerve.SwerveTemplates;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.DelayQueue;
 import POPLib.Sensors.Gyro.Gyro;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveModules.SwerveModule;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -80,23 +78,23 @@ abstract public class BaseSwerve extends SubsystemBase {
     public abstract void driveRobotOriented(Translation2d vector, double rot);
 
     public Translation2d accelrationLimit(Translation2d wantedVelcotiy) {
-        // Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
-        // double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
-        // lastTranslationVectorTime += ellapsedTime;
+        Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
+        double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
+        lastTranslationVectorTime += ellapsedTime;
         
-        // if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
-        //     delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
-        // }
+        if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
+            delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
+        }
 
-        // if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
-        //     delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
-        // }
+        if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
+            delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
+        }
 
-        // if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
-        //     delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
-        // }
+        if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
+            delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
+        }
 
-        // lastTranslationVector = delta;
+        lastTranslationVector = delta;
 
         return null;
     }

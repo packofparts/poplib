@@ -4,7 +4,6 @@ import POPLib.Swerve.SwerveConstants.SDSModules;
 import POPLib.Swerve.SwerveTemplates.BaseSwerve;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
