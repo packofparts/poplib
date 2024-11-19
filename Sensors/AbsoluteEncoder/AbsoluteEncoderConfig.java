@@ -1,18 +1,23 @@
 package POPLib.Sensors.AbsoluteEncoder;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public class AbsoluteEncoderConfig {
     public final int id;
-    public final double offset;
+    public final Rotation2d offset;
     public final boolean inversion;
 
-    public AbsoluteEncoderConfig(int id, double offset, boolean inversion) {
+    public AbsoluteEncoderConfig(int id, Rotation2d offset, boolean inversion) {
         this.id = id;
         this.offset = offset;
         this.inversion = inversion;
     }
 
-    public DutyCycleAbsoluteEncoder generateAbsoluteEncoder() {
-        return new DutyCycleAbsoluteEncoder(id, offset, inversion);
+    public CANCoder getCANCoder() {
+        return new CANCoder(this);
     }
 
+    public DutyCycleAbsoluteEncoder getDutyCycleEncoder() {
+        return new DutyCycleAbsoluteEncoder(this);
+    }
 }

@@ -4,24 +4,17 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
-public class DutyCycleAbsoluteEncoder extends AbsoluteEncoder{
+public class DutyCycleAbsoluteEncoder extends AbsoluteEncoder {
     private DutyCycleEncoder encoder;
-    private double offset;
-    private int inversion;
 
-    public DutyCycleAbsoluteEncoder(int id, double offset, boolean inversion) {
-        encoder = new DutyCycleEncoder(id);
-        this.offset = offset;
+    public DutyCycleAbsoluteEncoder(AbsoluteEncoderConfig config) {
+        super(config);
 
-        if (inversion) {
-            this.inversion = -1;
-        } else {
-            this.inversion = 1;
-        }
+        encoder = new DutyCycleEncoder(config.id);
     }
 
     public double getDegreePosition() {
-        return encoder.get() * 360 * inversion - offset;
+        return encoder.get() * 360 * (config.inversion ? -1 : 1) - config.offset.getDegrees();
     }
 
     @Override
