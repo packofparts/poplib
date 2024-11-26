@@ -3,10 +3,16 @@ package POPLib.Motor;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.REVLibError;
+import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import POPLib.Control.PIDConfig;
+import POPLib.ErrorHandelling.ErrorHandelling;
 import POPLib.SmartDashboard.PIDTuning;
 
 
@@ -79,16 +85,27 @@ public class MotorConfig {
                motor.getEncoder().setPosition(0);
           }
 
-          pid.setPid(motor);
-     }
+   public SparkMaxConfig getSparkMaxConfig() {
+     SparkMaxConfig config = new SparkMaxConfig();
+     config.inverted(inversion);
+     config.idleMode(mode.getSparkMaxMode());
+     config.smartCurrentLimit(currentLimit);
+     pid.setPid(motor);
 
-     public MotorConfig getInvertedConfig() { return new MotorConfig(canId, canBus, currentLimit, !inversion, pid, mode); }
+     return config;
+   }
 
-     public CANSparkMax createSparkMax() { return createSparkMax(CANSparkLowLevel.MotorType.kBrushless); }
+   public MotorConfig getInvertedConfig() { return new MotorConfig(canId, canBus, currentLimit, !inversion, pid, mode); }
 
-     public CANSparkMax createSparkMax(CANSparkLowLevel.MotorType type) {
-          CANSparkMax motor = new CANSparkMax(canId, type);
-          setCanSparkMaxConfig(motor, type);
-          return motor;
-     }
+   public SparkMax createSparkMax() { return createSparkMax(SparkLowLevel.MotorType.kBrushless); }
+
+   public SparkMax createSparkMax(SparkLowLevel.MotorType type) {
+        SparkMax motor = new SparkMax(canId, type);
+        ErrorHandelling.handlRevLibError(
+          motor.configure(getSparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+          "configuring motor " + canId
+        );
+        
+        return motor;
+   }
 }

@@ -3,8 +3,7 @@ package POPLib.Control;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.CANSparkMax;
-
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.PIDController;
 
 public class PIDConfig {
@@ -56,7 +55,7 @@ public class PIDConfig {
       config.withSlot0(slot0Configs);
    }
 
-   public void setPid(CANSparkMax sparkMax) {
+   public void setPid(SparkMax sparkMax) {
     sparkMax.getPIDController().setP(P);
     sparkMax.getPIDController().setI(I);
     sparkMax.getPIDController().setD(D);

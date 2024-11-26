@@ -2,10 +2,10 @@ package POPLib.Sensors.AbsoluteEncoder;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 
 public class CANCoder extends AbsoluteEncoder {
     private CANcoder encoder;
@@ -13,7 +13,9 @@ public class CANCoder extends AbsoluteEncoder {
     public CANCoder(AbsoluteEncoderConfig config) {
         super(config);
 
-        this.encoder = new CANcoder(config.id);
+        CANcoderConfiguration config = new CANcoderConfiguration();
+        config.MagnetSensor.SensorDirection = inverted;
+        config.MagnetSensor.MagnetOffset = offset.getRotations();
 
         CANcoderConfiguration sensorConfig = new CANcoderConfiguration();
         sensorConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
@@ -25,6 +27,6 @@ public class CANCoder extends AbsoluteEncoder {
 
     @Override
     public Rotation2d getPosition() {
-        return Rotation2d.fromRotations(encoder.getAbsolutePosition().getValue());
+        return Rotation2d.fromRotations(encoder.getAbsolutePosition().getValue().in(Units.Rotation));
     }
 }
