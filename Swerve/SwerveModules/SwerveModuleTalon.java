@@ -4,13 +4,13 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import POPLib.Math.Conversion;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
  * Falcon Swerve Module.
@@ -38,43 +38,29 @@ public class SwerveModuleTalon extends SwerveModule {
 
     @Override
     public void resetToAbsolute() {
-        angleMotor.setPosition(getCanCoder().getDegrees());
+        angleMotor.setPosition(getCanCoder().getRotations());
         lastAngle = getCanCoder();
     }
 
     @Override
-    public void log() {
-        if (swerveModuleConstants.swerveTuningMode) {
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle " + swerveModuleConstants.moduleNumber, MathUtil.inputModulus(angleMotor.getPosition().getValue().in(Units.Degrees), 0, 360));
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle Non Mod " + swerveModuleConstants.moduleNumber, angleEncoder.getPosition().getValue().in(Units.Degrees));
-            SmartDashboard.putNumber("Current Drive Velocity" + swerveModuleConstants.moduleNumber, Conversion.RPSToMPS(driveMotor.getVelocity().getValue().in(Units.RotationsPerSecond), SwerveModuleConstants.wheelCircumference));
-        }
-    }
-
-    @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angle) {
-        driveMotor.setControl(drivePID.withVelocity(Conversion.MPSToRPS(velocityMPS, SwerveModuleConstants.wheelCircumference))); 
+        driveMotor.setControl(drivePID.withVelocity(velocityMPS)); 
         angleMotor.setControl(anglePID.withPosition(angle.getDegrees()));
-
-        if (swerveModuleConstants.swerveTuningMode) {
-            SmartDashboard.putNumber("Target Drive Velocity: " + swerveModuleConstants.moduleNumber, velocityMPS);
-            SmartDashboard.putNumber("Target Relative Encoder Angle " + swerveModuleConstants.moduleNumber, angle.getDegrees());
-        }
     }
 
     @Override
-    protected Rotation2d getEncoderAngle() {
-        return Rotation2d.fromDegrees(angleMotor.getPosition().getValue().in(Units.Degrees));
+    protected Angle getAngle() {
+        return angleMotor.getPosition().getValue();
     }
 
     @Override
-    protected double getPositionMeter() {
-        return Conversion.rotationsToM(driveMotor.getPosition().getValue().in(Units.Rotations), SwerveModuleConstants.wheelCircumference);
+    protected Distance getPosition() {
+        return Units.Meter.of(driveMotor.getPosition().getValueAsDouble());
     }
 
     @Override
-    protected double getVelocityMeter() {
-        return Conversion.RPSToMPS(driveMotor.getVelocity().getValue().in(Units.RotationsPerSecond), SwerveModuleConstants.wheelCircumference);
+    protected LinearVelocity getVelocity() {
+        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble());
     }
 
     @Override

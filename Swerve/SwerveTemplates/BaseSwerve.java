@@ -54,8 +54,8 @@ abstract public class BaseSwerve extends SubsystemBase {
 
         this.field = new Field2d();
 
-        this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed;
-        this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity;
+        this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed.in(Units.MetersPerSecond);
+        this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity.in(Units.RadiansPerSecond);
 
         lastTranslationVector = new Translation2d();
         lastTranslationVectorTime = Timer.getFPGATimestamp();
@@ -162,7 +162,7 @@ abstract public class BaseSwerve extends SubsystemBase {
         double[] ret = new double[4];
 
         for (SwerveModule i : swerveMods) {
-            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionRotationRadians();
+            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionAngle().in(Units.Radians);
         }
 
         return ret;

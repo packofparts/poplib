@@ -5,12 +5,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-import POPLib.Math.Conversion;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SwerveModuleNeoTalon extends SwerveModule {
@@ -43,19 +44,8 @@ public class SwerveModuleNeoTalon extends SwerveModule {
     }
 
     @Override
-    public void log() {
-        if (swerveModuleConstants.swerveTuningMode) {
-            // SmartDashboard.putNumber("Angle Current " + swerveModuleConstants.moduleNumber, angleMotor.getOutputCurrent());
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle " + swerveModuleConstants.moduleNumber, angleEncoder.getPosition());
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle Mod " + swerveModuleConstants.moduleNumber, MathUtil.inputModulus(angleEncoder.getPosition(), 0, 360));
-            SmartDashboard.putNumber("Current Drive Velocity" + swerveModuleConstants.moduleNumber, Conversion.RPSToMPS(driveMotor.getVelocity().getValue().in(Units.RotationsPerSecond), SwerveModuleConstants.wheelCircumference));
-            SmartDashboard.putNumber("CanCoder Angle" + swerveModuleConstants.moduleNumber, getAbsoluteAngleDegrees());
-        }
-    }
-
-    @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians) {
-        driveMotor.setControl(drivePID.withVelocity(Conversion.MPSToRPS(velocityMPS, SwerveModuleConstants.wheelCircumference))); 
+        driveMotor.setControl(drivePID.withVelocity(velocityMPS)); 
         anglePID.setReference(angleRadians.getDegrees(), SparkMax.ControlType.kPosition);
 
         if (swerveModuleConstants.swerveTuningMode) {
@@ -65,18 +55,18 @@ public class SwerveModuleNeoTalon extends SwerveModule {
     }
 
     @Override
-    protected Rotation2d getEncoderAngle() {
-        return Rotation2d.fromDegrees(angleEncoder.getPosition());
+    protected Angle getAngle() {
+        return Units.Rotations.of(angleEncoder.getPosition());
     }
 
     @Override
-    protected double getPositionMeter() {
-        return Conversion.rotationsToM(driveMotor.getPosition().getValue().in(Units.Rotations), SwerveModuleConstants.wheelCircumference);
+    protected Distance getPosition() {
+        return Units.Meters.of(driveMotor.getPosition().getValueAsDouble());
     }
 
     @Override
-    protected double getVelocityMeter() {
-        return Conversion.RPSToMPS(driveMotor.getVelocity().getValue().in(Units.RotationsPerSecond), SwerveModuleConstants.wheelCircumference);
+    protected LinearVelocity getVelocity() {
+        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble());
     }
 
     @Override

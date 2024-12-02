@@ -3,13 +3,11 @@ package POPLib.Motor;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import POPLib.Control.PIDConfig;
-import POPLib.ErrorHandelling.ErrorHandelling;
 import POPLib.SmartDashboard.PIDTuning;
 
 
@@ -61,6 +59,7 @@ public class MotorConfig {
           talonConfig.MotorOutput.Inverted = inversion ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
 
           pid.updatePidConfig(talonConfig);
+          conversion.updateConfig(talonConfig);
 
           return talonConfig;
      }
@@ -71,8 +70,16 @@ public class MotorConfig {
           return motor;
      }
 
-     public void setSparkMaxConfig(SparkMax motor) {
+     public SparkMax setConfig(SparkMax motor) {
           MotorHelper.applySparkMaxConfig(getSparkMaxConfig(), motor, ResetMode.kResetSafeParameters);
+
+          return motor;
+     }
+
+     public TalonFX setConfig(TalonFX motor) {
+          motor.getConfigurator().apply(getTalonConfig());
+
+          return motor;
      }
 
      public SparkMax createSparkMax() { return createSparkMax(SparkLowLevel.MotorType.kBrushless); }
@@ -93,7 +100,7 @@ public class MotorConfig {
 
      public SparkMax createSparkMax(SparkLowLevel.MotorType type) {
           SparkMax motor = new SparkMax(canId, type);
-          setSparkMaxConfig(motor);
+          setConfig(motor);
           return motor;
      }
 }

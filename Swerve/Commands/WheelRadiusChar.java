@@ -5,7 +5,7 @@ import POPLib.Swerve.SwerveTemplates.BaseSwerve;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -25,8 +25,8 @@ public class WheelRadiusChar extends Command {
     public WheelRadiusChar(BaseSwerve swerve, SDSModules moduleInfo, double driveBaseRadius) {
         this.swerve = swerve;
         this.driveBaseRadius = driveBaseRadius;
-        this.MAX_TURN_SPEED *= moduleInfo.maxAngularVelocity;
-        this.MAX_TURN_ACCEL *= moduleInfo.maxAngularAcceleration;
+        this.MAX_TURN_SPEED *= moduleInfo.maxAngularVelocity.in(Units.RadiansPerSecond);
+        this.MAX_TURN_ACCEL *= moduleInfo.maxAngularAcceleration.in(Units.RotationsPerSecondPerSecond);
         this.accelLimit = new SlewRateLimiter(MAX_TURN_ACCEL);
 
         addRequirements(swerve);
@@ -58,7 +58,7 @@ public class WheelRadiusChar extends Command {
 
         currentRadius = (accumulatedAngle * driveBaseRadius) / averageWheelPos;
 
-        SmartDashboard.putNumber("Current Diamater", 2.0 * Units.metersToInches(currentRadius));
+        SmartDashboard.putNumber("Current Diamater", 2.0 * edu.wpi.first.math.util.Units.metersToInches(currentRadius));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class WheelRadiusChar extends Command {
         if (accumulatedAngle <= 2*Math.PI) {
             System.out.println("Not enough data to compute final result");
         } else {
-            System.out.println("Final Diamater in inches " + Units.metersToInches(currentRadius) * 2.0); 
+            System.out.println("Final Diamater in inches " + edu.wpi.first.math.util.Units.metersToInches(currentRadius) * 2.0); 
         }
     }
 
