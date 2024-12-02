@@ -20,7 +20,7 @@ public class Joysticks extends OI {
 
     public static final class OIConstants  {
         public static final int DRIVE_PORT = 0;
-        public static final int TRANS_PORT = 0;
+        public static final int TRANS_PORT = 1;
         public static final int OPERATOR_PORT = 2;
     }
 
