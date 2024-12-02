@@ -28,9 +28,9 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
 
         this.odom = new SwerveDrivePoseEstimator(
                 kinematics,
-                getGyro().getAngle(),
+                getGyro().getNormalizedRotation2dAngle(),
                 getPose(),
-                new Pose2d(0, 0, getGyro().getAngle()),
+                new Pose2d(0, 0, getGyro().getNormalizedRotation2dAngle()),
                 stateStdDevs,
                 visionMeasurementStdDevs);
 
@@ -82,6 +82,6 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
-        odom.update(getGyro().getAngle(), getPose());
+        odom.update(getGyro().getNormalizedRotation2dAngle(), getPose());
     }
 }

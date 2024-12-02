@@ -34,7 +34,7 @@ public class WheelRadiusChar extends Command {
 
     @Override
     public void initialize() {
-        lastAngle = swerve.getGyro().getAngle().getRadians();
+        lastAngle = swerve.getGyro().getNormalizedRotation2dAngle().getRadians();
         accumulatedAngle = 0.0;
         startWheelPose = swerve.getPoseRotationsRadians();
         currentRadius = 0.0;
@@ -44,8 +44,8 @@ public class WheelRadiusChar extends Command {
     public void execute() {
         swerve.driveRobotOriented(new Translation2d(0,0), accelLimit.calculate(MAX_TURN_SPEED));
 
-        accumulatedAngle += MathUtil.angleModulus(swerve.getGyro().getAngle().getRadians() - lastAngle);
-        lastAngle = swerve.getGyro().getAngle().getRadians();
+        accumulatedAngle += MathUtil.angleModulus(swerve.getGyro().getNormalizedRotation2dAngle().getRadians() - lastAngle);
+        lastAngle = swerve.getGyro().getNormalizedRotation2dAngle().getRadians();
 
         double averageWheelPos = 0.0;
         double[] wheelPositiions = swerve.getPoseRotationsRadians();

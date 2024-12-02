@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * Encapsulates pigeon gyroscope.
@@ -33,25 +35,20 @@ public class Pigeon extends Gyro {
     }
 
     @Override
-    public Rotation2d getAngle() {
-        Rotation2d yaw = getYaw();
-
-
-        return inversion 
-            ? Rotation2d.fromDegrees(MathUtil.inputModulus(360 - yaw.getDegrees(), 0, 360))
-            : Rotation2d.fromDegrees(MathUtil.inputModulus(yaw.getDegrees(), 0, 360));
+    public Angle getNormalizedAngle() {
+        return invertAndNormalizeAngle(getYaw());
     }
 
-    public Rotation2d getYaw() {
-        return new Rotation2d(gyro.getYaw().getValue());
+    public Angle getYaw() {
+        return gyro.getYaw().getValue();
     }
 
-    public Rotation2d getPitch() {
-        return new Rotation2d(gyro.getPitch().getValue());
+    public Angle getPitch() {
+        return gyro.getPitch().getValue();
     }
 
-    public Rotation2d getRoll() {
-        return new Rotation2d(gyro.getRoll().getValue());
+    public Angle getRoll() {
+        return gyro.getRoll().getValue();
     }
 
     @Override
@@ -65,17 +62,25 @@ public class Pigeon extends Gyro {
     }
 
     @Override
-    public Rotation2d getAngularVelo() {
-        return Rotation2d.fromDegrees(gyro.getAngularVelocityZDevice().getValue().in(Units.RotationsPerSecond));
+    public AngularVelocity getAngularVelo() {
+        return gyro.getAngularVelocityZDevice().getValue();
     }
 
     @Override
-    public Rotation2d getLatencyCompensatedAngle() {
+    public Angle getLatencyCompensatedAngle() {
         Measure<AngleUnit> yaw = BaseStatusSignal.getLatencyCompensatedValue(gyro.getYaw().refresh(), gyro.getAngularVelocityZDevice().refresh());
 
-        return inversion 
-            ? Rotation2d.fromDegrees(MathUtil.inputModulus(360 - yaw.in(Units.Degree), 0, 360))
-            : Rotation2d.fromDegrees(MathUtil.inputModulus(yaw.in(Units.Degrees), 0, 360));
+        return invertAndNormalizeAngle(yaw);
+    }
+
+    private Angle invertAndNormalizeAngle(Measure<AngleUnit> angle) {
+        return inversion ? Units.Degrees.of(MathUtil.inputModulus(360 - angle.in(Units.Degrees), 0, 360))
+                         : Units.Degrees.of(MathUtil.inputModulus(angle.in(Units.Degrees), 0, 360));
+    }
+
+    @Override
+    public Rotation2d getNormalizedRotation2dAngle() {
+        return new Rotation2d(getNormalizedAngle());
     }
 
 }

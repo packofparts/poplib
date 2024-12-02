@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -39,7 +40,6 @@ abstract public class BaseSwerve extends SubsystemBase {
     private Translation2d lastTranslationVector;
     private double lastTranslationVectorTime;
 
-    public static final double GYRO_LATENCY_COMPENSTATION = 0.0;
     public static final double MAX_SKID_ACCEL = 100.0;
     public static final double MAX_X_TILT_ACCEL = 100.0;    
     public static final double MAX_Y_TILT_ACCEL = 0.5;
@@ -133,11 +133,9 @@ abstract public class BaseSwerve extends SubsystemBase {
         vector = vector.times(maxSpeed);
         rot *= maxAngularVelocity;
 
-        vector = vector.rotateBy(
-                        gyro.getAngularVelo().times(GYRO_LATENCY_COMPENSTATION).plus(
-                                Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0)).minus(gyro.getAngle())); // We are adding a value for
-                                                                                        //    latency conpensation,
-                                                                                        //    currently untuned
+        vector = vector.rotateBy(new Rotation2d(
+            Units.Degrees.of(color == Alliance.Red ? 180 : 0).minus(gyro.getNormalizedAngle())
+        ));
 
         // vector = vector.rotateBy(Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0).minus(gyro.getLatencyCompensatedAngle())); //TODO: TEST
 
@@ -216,7 +214,7 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Angle", MathUtil.inputModulus(gyro.getAngle().getDegrees(), 0, 360));
+        SmartDashboard.putNumber("Angle", MathUtil.inputModulus(gyro.getNormalizedAngle().in(Units.Degrees), 0, 360));
 
         if (tuningMode) {
             SmartDashboard.putNumber("Robot Angle Velo", getAngleVelo());

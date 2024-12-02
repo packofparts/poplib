@@ -37,6 +37,6 @@ public abstract class CustomBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
-        odom.updatePoseWithGyro(getPose(), getGyro().getAngle());
+        odom.updatePoseWithGyro(getPose(), getGyro().getNormalizedRotation2dAngle());
     }
 }
