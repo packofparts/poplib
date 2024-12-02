@@ -3,7 +3,7 @@ package POPLib.Control;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 
 public class PIDConfig {
@@ -11,12 +11,12 @@ public class PIDConfig {
    public final double I;
    public final double D;
    public final double F;
-   
+
    public PIDConfig(double p, double i, double d, double f) {
-    this.P = p;
-    this.I = i;
-    this.D = d;
-    this.F = f;
+      this.P = p;
+      this.I = i;
+      this.D = d;
+      this.F = f;
    }
 
    public PIDConfig(double p, double d, double f) { this(p, 0.0, d, f); }
@@ -46,7 +46,7 @@ public class PIDConfig {
 
    public void updatePidConfig(TalonFXConfiguration config) {
       Slot0Configs slot0Configs = new Slot0Configs();
-   
+
       slot0Configs.kV = F;
       slot0Configs.kP = P;
       slot0Configs.kI = I;
@@ -55,14 +55,11 @@ public class PIDConfig {
       config.withSlot0(slot0Configs);
    }
 
-   public void setPid(SparkMax sparkMax) {
-    sparkMax.getPIDController().setP(P);
-    sparkMax.getPIDController().setI(I);
-    sparkMax.getPIDController().setD(D);
-    sparkMax.getPIDController().setFF(F);
+   public void setPid(SparkMaxConfig config) {
+      config.closedLoop.pidf(P,I,D,F);
    }
 
    public PIDController getPIDController() {
-    return new PIDController(P, I, D);
+      return new PIDController(P, I, D);
    }
 }

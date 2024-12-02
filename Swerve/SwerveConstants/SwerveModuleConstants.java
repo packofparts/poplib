@@ -4,17 +4,18 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import POPLib.Motor.ConversionConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.Motor.MotorHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 
 /**
@@ -33,7 +34,7 @@ public class SwerveModuleConstants {
     public static NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
     public static IdleMode driveIdleMode = IdleMode.kBrake;
 
-    public final static double wheelCircumference = Units.inchesToMeters(4) * Math.PI;
+    public final static double wheelCircumference = edu.wpi.first.math.util.Units.inchesToMeters(4) * Math.PI;
 
     public final double driveRotationsToMeters;
 
@@ -133,10 +134,10 @@ public class SwerveModuleConstants {
         return ret;
         }
 
-    public CANSparkMax getDriveNeo() {
-        CANSparkMax neo = new CANSparkMax(driveMotorId, MotorType.kBrushless);
-        driveConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
-        MotorHelper.setConversionFactor(neo, driveRotationsToMeters);
+    public SparkMax getDriveNeo() {
+        SparkMax neo = new SparkMax(driveMotorId, MotorType.kBrushless);
+        driveConfig.conversion = new ConversionConfig(driveRotationsToMeters, Units.Rotations);
+        driveConfig.setSparkMaxConfig(neo);
         return neo;
     }
 
@@ -148,14 +149,16 @@ public class SwerveModuleConstants {
         return drive;
     }
 
-    public CANSparkMax getAngleNeo() {
-        CANSparkMax neo = new CANSparkMax(angleMotorId, MotorType.kBrushless);
-        angleConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
-        MotorHelper.setDegreeConversionFactor(neo, moduleInfo.angleGearRatio);
+    public SparkMax getAngleNeo() {
+        SparkMax neo = new SparkMax(angleMotorId, MotorType.kBrushless);
+        angleConfig.conversion = new ConversionConfig(moduleInfo.angleGearRatio, Units.Degrees);
 
-        neo.getPIDController().setPositionPIDWrappingEnabled(true);
-        neo.getPIDController().setPositionPIDWrappingMinInput(0);
-        neo.getPIDController().setPositionPIDWrappingMinInput(360);
+        SparkMaxConfig config = angleConfig.getSparkMaxConfig();
+        config.closedLoop.positionWrappingEnabled(true);
+        config.closedLoop.positionWrappingMinInput(0);
+        config.closedLoop.positionWrappingMaxInput(360);
+
+        MotorHelper.applySparkMaxConfig(config, neo, ResetMode.kResetSafeParameters);
 
         return neo;
     }
@@ -172,7 +175,6 @@ public class SwerveModuleConstants {
         CANcoder angleEncoder = new CANcoder(cancoderId, Constants.Ports.CANIVORE_NAME);
 
         CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         config.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
 

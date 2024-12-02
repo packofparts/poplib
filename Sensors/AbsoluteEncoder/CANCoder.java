@@ -13,12 +13,7 @@ public class CANCoder extends AbsoluteEncoder {
     public CANCoder(AbsoluteEncoderConfig config) {
         super(config);
 
-        CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.SensorDirection = inverted;
-        config.MagnetSensor.MagnetOffset = offset.getRotations();
-
         CANcoderConfiguration sensorConfig = new CANcoderConfiguration();
-        sensorConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         sensorConfig.MagnetSensor.SensorDirection = SensorDirectionValue.valueOf(config.inversion ? 1 : 0);
         sensorConfig.MagnetSensor.MagnetOffset = config.offset.getRotations();
 

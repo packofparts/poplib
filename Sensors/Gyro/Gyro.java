@@ -12,13 +12,13 @@ public abstract class Gyro {
 
     public abstract void setAngle(Rotation2d newAngle);
 
-    public abstract double getRoll();
+    public abstract Rotation2d getRoll();
 
-    public abstract double getPitch();
+    public abstract Rotation2d getPitch();
 
-    public abstract double getYaw();
+    public abstract Rotation2d getYaw();
 
-    public abstract double getAngularVelo();
+    public abstract Rotation2d getAngularVelo();
 
     public abstract Rotation2d getLatencyCompensatedAngle();
 }

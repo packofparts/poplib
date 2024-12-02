@@ -2,11 +2,12 @@ package POPLib.SmartDashboard;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.CANSparkMax;
-
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import POPLib.Control.PIDConfig;
-
-
+import POPLib.ErrorHandelling.ErrorHandelling;
 
 public class PIDTuning {
     private final TunableNumber kP;
@@ -27,17 +28,24 @@ public class PIDTuning {
         tuningMode = kTuningMode;
     }
 
-    public void updatePID(CANSparkMax motor){
-        if (tuningMode) {
-            if (kP.hasChanged()) motor.getPIDController().setP(kP.get());
-            if (kI.hasChanged()) motor.getPIDController().setI(kI.get());
-            if (kD.hasChanged()) motor.getPIDController().setD(kD.get());
-            if (kF.hasChanged()) motor.getPIDController().setFF(kF.get());
+    private boolean isPIDChanged() {
+        return (kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kF.hasChanged()) && (tuningMode);
+    }
+
+    public void updatePID(SparkMax motor){
+        if (isPIDChanged()) { 
+            SparkMaxConfig config = new SparkMaxConfig();
+            config.closedLoop.pidf(kP.get(),kI.get(), kD.get(), kF.get());
+            
+            ErrorHandelling.handlRevLibError(
+                motor.configure(config,  ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters),
+                "updating PID for motor id " + motor.getDeviceId()
+            );
         }
     }
 
     public void updatePID(TalonFX motor){
-        if ((kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kF.hasChanged()) && (tuningMode)) {
+        if (isPIDChanged()) {
             Slot0Configs slot0Configs = new Slot0Configs();
             slot0Configs.kV = kF.get();
             slot0Configs.kP = kP.get();

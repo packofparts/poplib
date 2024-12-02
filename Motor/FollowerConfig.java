@@ -2,8 +2,11 @@ package POPLib.Motor;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import POPLib.ErrorHandelling.ErrorHandelling;
 
 public class FollowerConfig {
     private MotorConfig leadConfig;
@@ -16,10 +19,15 @@ public class FollowerConfig {
         this.canId = canId;
     }
 
-    public CANSparkMax createSparkMax(CANSparkMax lead) { 
-        CANSparkMax motor = new CANSparkMax(canId, CANSparkLowLevel.MotorType.kBrushless);
-        leadConfig.setCanSparkMaxConfig(motor, CANSparkLowLevel.MotorType.kBrushless);
-        motor.follow(lead, inverted);
+    public SparkMax createSparkMax(SparkMax lead) { 
+        SparkMax motor = new SparkMax(canId, SparkMax.MotorType.kBrushless);
+        SparkMaxConfig config = leadConfig.getSparkMaxConfig();
+        config.follow(leadConfig.canId, inverted);
+        
+        ErrorHandelling.handlRevLibError(
+            motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+            "configuring follower motor " + canId
+        );
 
         return motor;
     }
