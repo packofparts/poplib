@@ -1,6 +1,7 @@
 package POPLib.Swerve.SwerveModules;
 
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -12,11 +13,12 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.units.measure.Voltage;
 
 public class SwerveModuleNeoTalon extends SwerveModule {
     private final TalonFX driveMotor;
     private final VelocityDutyCycle drivePID;
+    private final VoltageOut driveVoltage;
 
     private final SparkMax angleMotor;
     private final RelativeEncoder angleEncoder;
@@ -33,25 +35,21 @@ public class SwerveModuleNeoTalon extends SwerveModule {
         resetToAbsolute();
 
         drivePID = new VelocityDutyCycle(0); 
+        driveVoltage = new VoltageOut(0.0);
         lastAngle = getPose().angle;
     }
 
 
     @Override
     public void resetToAbsolute() {
-        angleEncoder.setPosition(getCanCoder().getDegrees()); 
+        angleEncoder.setPosition(getCanCoder().getRotations()); 
         lastAngle = getCanCoder();
     }
 
     @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians) {
         driveMotor.setControl(drivePID.withVelocity(velocityMPS)); 
-        anglePID.setReference(angleRadians.getDegrees(), SparkMax.ControlType.kPosition);
-
-        if (swerveModuleConstants.swerveTuningMode) {
-            SmartDashboard.putNumber("Target Drive Velocity: " + swerveModuleConstants.moduleNumber, velocityMPS);
-            SmartDashboard.putNumber("Target Relative Encoder Angle " + swerveModuleConstants.moduleNumber, angleRadians.getDegrees());
-        }
+        anglePID.setReference(angleRadians.getRotations(), SparkMax.ControlType.kPosition);
     }
 
     @Override
@@ -73,5 +71,18 @@ public class SwerveModuleNeoTalon extends SwerveModule {
     public void updatePID(PIDTuning angle, PIDTuning drive) {
         angle.updatePID(angleMotor);
         drive.updatePID(driveMotor);
+    }
+
+
+    @Override
+    public void runSysIdRoutine(double voltage) {
+        driveMotor.setControl(driveVoltage.withOutput(voltage)); 
+        anglePID.setReference(0.0, SparkMax.ControlType.kPosition);    
+    }
+
+
+    @Override
+    protected Voltage getDriveVoltage() {
+        return driveMotor.getMotorVoltage().getValue();
     }
 }

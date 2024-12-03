@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -176,6 +177,18 @@ abstract public class BaseSwerve extends SubsystemBase {
         }
 
         return ret;
+    }
+
+    public void runSysIdRoutine(double voltage) {
+        for (SwerveModule i : swerveMods) {
+            i.runSysIdRoutine(voltage);
+        }
+    }
+
+    public void sysIdLogMotors(SysIdRoutineLog log) {
+        for (SwerveModule i : swerveMods) {
+            i.logSysId(log);
+        }
     }
 
     protected void setGyro(Pose2d pose) {

@@ -2,6 +2,7 @@ package POPLib.Swerve.SwerveModules;
 
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import POPLib.SmartDashboard.PIDTuning;
@@ -11,6 +12,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * Falcon Swerve Module.
@@ -20,6 +22,7 @@ public class SwerveModuleTalon extends SwerveModule {
     private TalonFX driveMotor;
 
     private VelocityDutyCycle drivePID;
+    private VoltageOut driveVoltage;
     private PositionDutyCycle anglePID;
 
     public SwerveModuleTalon(SwerveModuleConstants moduleConstants) {
@@ -33,6 +36,7 @@ public class SwerveModuleTalon extends SwerveModule {
         lastAngle = getPose().angle;
 
         drivePID = new VelocityDutyCycle(0); 
+        driveVoltage = new VoltageOut(0.0);
         anglePID = new PositionDutyCycle(0); 
     }
 
@@ -45,7 +49,7 @@ public class SwerveModuleTalon extends SwerveModule {
     @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angle) {
         driveMotor.setControl(drivePID.withVelocity(velocityMPS)); 
-        angleMotor.setControl(anglePID.withPosition(angle.getDegrees()));
+        angleMotor.setControl(anglePID.withPosition(angle.getRotations()));
     }
 
     @Override
@@ -67,5 +71,16 @@ public class SwerveModuleTalon extends SwerveModule {
     public void updatePID(PIDTuning angle, PIDTuning drive) {
         angle.updatePID(angleMotor);
         drive.updatePID(driveMotor);
+    }
+
+    @Override
+    public void runSysIdRoutine(double voltage) {
+        angleMotor.setControl(anglePID.withPosition(0.0)); 
+        driveMotor.setControl(driveVoltage.withOutput(voltage));
+    }
+
+    @Override
+    protected Voltage getDriveVoltage() {
+        return driveMotor.getMotorVoltage().getValue();
     }
 }

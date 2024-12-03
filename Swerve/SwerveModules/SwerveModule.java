@@ -21,8 +21,10 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 
 public abstract class SwerveModule {
     public SwerveModuleConstants swerveModuleConstants;
@@ -50,6 +52,14 @@ public abstract class SwerveModule {
     abstract protected Angle getAngle();
     abstract protected Distance getPosition();
     abstract protected LinearVelocity getVelocity();
+    abstract protected Voltage getDriveVoltage();
+
+    public void logSysId(SysIdRoutineLog log) {
+        log.motor("Drive " + swerveModuleConstants.moduleNumber)
+            .linearPosition(getPosition())
+            .linearVelocity(getVelocity())
+            .voltage(getDriveVoltage());
+    }
 
     Rotation2d getRotation2dAngle() {
         return new Rotation2d(getAngle());
@@ -109,6 +119,8 @@ public abstract class SwerveModule {
     
         applySwerveModuleState(state.speedMetersPerSecond, angle);
     }
+
+    public abstract void runSysIdRoutine(double voltage);
 
     public LinearVelocity accelLimit(LinearVelocity newVelocity) {
         LinearVelocity velocityChange = newVelocity.minus(lastVelo);

@@ -8,6 +8,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 
 public class SwerveModuleNeo extends SwerveModule {
     private final SparkMax driveMotor;
@@ -23,7 +24,7 @@ public class SwerveModuleNeo extends SwerveModule {
 
     @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians) {
-        angleMotor.getClosedLoopController().setReference(angleRadians.getRadians(), SparkMax.ControlType.kPosition);
+        angleMotor.getClosedLoopController().setReference(angleRadians.getRotations(), SparkMax.ControlType.kPosition);
         driveMotor.getClosedLoopController().setReference(velocityMPS, SparkMax.ControlType.kVelocity);
     }
 
@@ -51,5 +52,17 @@ public class SwerveModuleNeo extends SwerveModule {
     public void updatePID(PIDTuning angle, PIDTuning drive) {
         angle.updatePID(angleMotor);
         drive.updatePID(driveMotor);
+    }
+
+    @Override
+    public void runSysIdRoutine(double voltage) {
+        angleMotor.getClosedLoopController().setReference(0.0, SparkMax.ControlType.kPosition);
+        driveMotor.setVoltage(voltage);
+    }
+
+    @Override
+    protected Voltage getDriveVoltage() {
+        // TOOD: Verify correctness
+        return Units.Volts.of(driveMotor.getBusVoltage());
     }
 }
