@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -179,9 +180,9 @@ abstract public class BaseSwerve extends SubsystemBase {
         return ret;
     }
 
-    public void runSysIdRoutine(double voltage) {
+    public void runSysIdRoutine(Voltage voltage) {
         for (SwerveModule i : swerveMods) {
-            i.runSysIdRoutine(voltage);
+            i.runSysIdRoutine(voltage.in(Units.Volt));
         }
     }
 

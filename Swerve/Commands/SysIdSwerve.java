@@ -9,9 +9,9 @@ public class SysIdSwerve {
    SysIdRoutine routine;
    
    public SysIdSwerve(BaseSwerve swerve) {
-        SysIdRoutine routine = new SysIdRoutine(
+        routine = new SysIdRoutine(
             new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(swerve::runSysIdRoutine, swerve::logSysId, swerve, "Swerve")
+            new SysIdRoutine.Mechanism(swerve::runSysIdRoutine, swerve::sysIdLogMotors, swerve, "Swerve")
         );
    }
 
