@@ -16,7 +16,6 @@ import POPLib.Motor.MotorHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
-import frc.robot.Constants;
 
 /**
  * Wrapper class for swerve module constants.
@@ -143,7 +142,7 @@ public class SwerveModuleConstants {
     }
 
     public TalonFX getDriveFalcon() {
-        return driveConfig.setConfig(new TalonFX(driveMotorId, Constants.Ports.CANIVORE_NAME));
+        return driveConfig.setConfig(new TalonFX(driveMotorId, driveConfig.canBus));
     }
 
     public SparkMax getAngleNeo() {
@@ -159,11 +158,11 @@ public class SwerveModuleConstants {
     }
 
     public TalonFX getAngleFalcon() {
-        return angleConfig.setConfig(new TalonFX(angleMotorId, Constants.Ports.CANIVORE_NAME));
+        return angleConfig.setConfig(new TalonFX(angleMotorId, angleConfig.canBus));
     }
 
     public CANcoder getCanCoder() {
-        CANcoder angleEncoder = new CANcoder(cancoderId, Constants.Ports.CANIVORE_NAME);
+        CANcoder angleEncoder = new CANcoder(cancoderId, angleConfig.canBus);
 
         CANcoderConfiguration config = new CANcoderConfiguration();
         config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
