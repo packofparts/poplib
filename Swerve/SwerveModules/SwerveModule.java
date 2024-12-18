@@ -26,21 +26,45 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.littletonrobotics.junction.Logger;
+
 public abstract class SwerveModule {
     public SwerveModuleConstants swerveModuleConstants;
     protected CANcoder angleEncoder;
     protected Rotation2d lastAngle;
+
+    private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+    private final int index;
     
+    private final Alert driveDisconnectedAlert;
+    private final Alert turnDisconnectedAlert;
+    private final Alert turnEncoderDisconnectedAlert;
+
     protected LinearVelocity lastVelo;
     protected Time lastVeloTime;
 
-    public SwerveModule(SwerveModuleConstants moduleConstants) {
+    public SwerveModule(SwerveModuleConstants moduleConstants, int index) {
         angleEncoder = moduleConstants.getCanCoder();
         this.swerveModuleConstants = moduleConstants;
         lastAngle = Rotation2d.fromDegrees(0);
 
         lastVelo = Units.MetersPerSecond.of(0.0);
         lastVeloTime = Units.Seconds.of(Timer.getFPGATimestamp());
+
+        // Create Alerts for Disconnected components
+        driveDisconnectedAlert =
+            new Alert(
+                "Disconnected drive motor on module " + Integer.toString(index) + ".",
+                AlertType.kError);
+        turnDisconnectedAlert =
+            new Alert(
+                "Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+        turnEncoderDisconnectedAlert =
+            new Alert(
+                "Disconnected turn encoder on module " + Integer.toString(index) + ".",
+                AlertType.kError);
     }
 
     // Resets swerve module to the cancoder angle
@@ -141,5 +165,22 @@ public abstract class SwerveModule {
         lastVeloTime.plus(ellapsedTime);
 
         return newVelocity;
+    }
+
+    public void updateInputs() {
+        // Yet to be implemented
+
+
+        
+    }
+
+    public void periodic() {
+        self.updateInputs();
+        Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+
+        // Update alerts
+        driveDisconnectedAlert.set(!inputs.driveConnected);
+        turnDisconnectedAlert.set(!inputs.turnConnected);
+        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
     }
 }
