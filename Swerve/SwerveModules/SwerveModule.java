@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
 
-public abstract class SwerveModule {
+public abstract class SwerveModule implements SwerveModuleIO{
     public SwerveModuleConstants swerveModuleConstants;
     protected CANcoder angleEncoder;
     protected Rotation2d lastAngle;
@@ -167,6 +167,7 @@ public abstract class SwerveModule {
         return newVelocity;
     }
 
+    @Override
     public void updateInputs() {
         // Yet to be implemented
 
