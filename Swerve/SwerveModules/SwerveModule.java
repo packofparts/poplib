@@ -36,7 +36,6 @@ public abstract class SwerveModule implements SwerveModuleIO{
     protected Rotation2d lastAngle;
 
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-    private final int index;
     
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
@@ -45,7 +44,7 @@ public abstract class SwerveModule implements SwerveModuleIO{
     protected LinearVelocity lastVelo;
     protected Time lastVeloTime;
 
-    public SwerveModule(SwerveModuleConstants moduleConstants, int index) {
+    public SwerveModule(SwerveModuleConstants moduleConstants) {
         angleEncoder = moduleConstants.getCanCoder();
         this.swerveModuleConstants = moduleConstants;
         lastAngle = Rotation2d.fromDegrees(0);
@@ -56,14 +55,14 @@ public abstract class SwerveModule implements SwerveModuleIO{
         // Create Alerts for Disconnected components
         driveDisconnectedAlert =
             new Alert(
-                "Disconnected drive motor on module " + Integer.toString(index) + ".",
+                "Disconnected drive motor on module " + Integer.toString(moduleConstants.moduleNumber) + ".",
                 AlertType.kError);
         turnDisconnectedAlert =
             new Alert(
-                "Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+                "Disconnected turn motor on module " + Integer.toString(moduleConstants.moduleNumber) + ".", AlertType.kError);
         turnEncoderDisconnectedAlert =
             new Alert(
-                "Disconnected turn encoder on module " + Integer.toString(index) + ".",
+                "Disconnected turn encoder on module " + Integer.toString(moduleConstants.moduleNumber) + ".",
                 AlertType.kError);
     }
 
@@ -90,7 +89,7 @@ public abstract class SwerveModule implements SwerveModuleIO{
     }
 
     public Angle getPositionAngle() {
-        return Units.Rotations.of(getPosition().div(SwerveModuleConstants.wheelCircumference).magnitude());
+        return Units.Rotations.of(getPosition().divide(SwerveModuleConstants.wheelCircumference).magnitude());
     }
 
     public void log() {
@@ -168,16 +167,16 @@ public abstract class SwerveModule implements SwerveModuleIO{
     }
 
     @Override
-    public void updateInputs() {
+    public void updateInputs(ModuleIOInputsAutoLogged inputs) {
         // Yet to be implemented
-
+        
 
         
     }
 
     public void periodic() {
-        self.updateInputs();
-        Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+        updateInputs(inputs);
+        Logger.processInputs("Drive/Module" + Integer.toString(swerveModuleConstants.moduleNumber), inputs);
 
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveConnected);
