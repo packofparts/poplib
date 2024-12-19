@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.CTREModuleState;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
+import POPLib.Swerve.SwerveModules.SwerveModuleIO.ModuleIOInputsAutoLogged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -165,6 +166,7 @@ public abstract class SwerveModule implements SwerveModuleIO{
 
         return newVelocity;
     }
+
 
     @Override
     public void updateInputs(ModuleIOInputsAutoLogged inputs) {
