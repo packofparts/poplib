@@ -1,28 +1,25 @@
 package POPLib.Subsytems.Pivot;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkMax;
 import POPLib.Control.ArmFFConfig;
+import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
-import POPLib.Motor.MotorHelper;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
 import POPLib.SmartDashboard.PIDTuning;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SparkPivot extends Pivot {
-    private final CANSparkMax leadMotor;
-    private final CANSparkMax followerMotor;
+    private final SparkMax leadMotor;
+    @SuppressWarnings("unused")
+    private final SparkMax followerMotor;
     private final PIDTuning pid;
 
-    public SparkPivot(MotorConfig leadConfig, MotorConfig followerConfig, double gearRatio, boolean invertedMotors, ArmFFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
+    public SparkPivot(MotorConfig leadConfig, FollowerConfig followerConfig, double gearRatio, ArmFFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
         super(ffConfig, absoluteConfig, tuningMode, subsytemName);
         leadMotor = leadConfig.createSparkMax();
-        followerMotor = followerConfig.createSparkMax();
-        
-        MotorHelper.setDegreeConversionFactor(leadMotor, gearRatio);
-        MotorHelper.setDegreeConversionFactor(followerMotor,gearRatio);
-
-        followerMotor.follow(leadMotor, invertedMotors);
+        followerMotor = followerConfig.createSparkMax(leadMotor);
 
         pid = leadConfig.genPIDTuning("Pivot Motor " + subsytemName, tuningMode);
 
@@ -47,11 +44,12 @@ public class SparkPivot extends Pivot {
     public void periodic() {
         pid.updatePID(leadMotor);
 
-        leadMotor.getPIDController().setReference(
+        // TODO: Move to mutable units
+        leadMotor.getClosedLoopController().setReference(
             setpoint.get(), 
             ControlType.kPosition,
             0,
-            ff.calculate(Math.toRadians(leadMotor.getEncoder().getPosition()), 0)
+            ff.calculate(Units.Degrees.of(leadMotor.getEncoder().getPosition()), Units.DegreesPerSecond.of(0)).in(Units.Volt)
         );
     }
 

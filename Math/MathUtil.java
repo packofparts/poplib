@@ -25,19 +25,20 @@ public class MathUtil {
         return Math.abs(target - setpoint);
     }
 
-   public static double getError(SparkMax target, double setpoint) {
-    return getError(target.getEncoder().getPosition(), setpoint);
-   }
+    public static double getError(SparkMax target, double setpoint) {
+        return getError(target.getEncoder().getPosition(), setpoint);
+    }
 
-   public static double getError(SparkMax target, TunableNumber setpoint) {
-    return getError(target.getEncoder().getPosition(), setpoint.get());
-   }
+    public static double getError(SparkMax target, TunableNumber setpoint) {
+        return getError(target.getEncoder().getPosition(), setpoint.get());
+    }
 
     public static double getError(TalonFX target, TunableNumber setpoint) {
         return getError(target.getPosition().getValueAsDouble(), setpoint.get());
     }
 
-   public static double getError(SparkMax target, AbsoluteEncoder setpoint) {
-    return getError(target.getEncoder().getPosition(), setpoint.getNormalizedPosition());
-   }
+    public static double getError(SparkMax target, AbsoluteEncoder setpoint) {
+        return getError(target.getEncoder().getPosition(), setpoint.getPosition().getDegrees());
+    }
+
 }

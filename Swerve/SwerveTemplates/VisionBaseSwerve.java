@@ -1,9 +1,13 @@
 package POPLib.Swerve.SwerveTemplates;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 
+import POPLib.Sensors.Camera.Camera;
+import POPLib.Sensors.Camera.CameraConfig;
 import POPLib.Sensors.Gyro.Gyro;
 import POPLib.Swerve.SwerveModules.SwerveModule;
 import edu.wpi.first.math.Matrix;
@@ -20,31 +24,41 @@ import edu.wpi.first.math.numbers.N3;
 public abstract class VisionBaseSwerve extends BaseSwerve {
     protected final SwerveDrivePoseEstimator odom;
     private final SwerveDriveKinematics kinematics;
+    private ArrayList<Camera> cameras;
 
     public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics,
-            Matrix<N3, N1> stateStdDevs, Matrix<N3, N1> visionMeasurementStdDevs) {
+            Matrix<N3, N1> stateStdDevs, Matrix<N3, N1> visionMeasurementStdDevs, List<CameraConfig> cameraConfigs) {
         super(swerveMods, gyro);
         this.kinematics = kinematics;
 
         this.odom = new SwerveDrivePoseEstimator(
                 kinematics,
-                getGyro().getAngle(),
+                getGyro().getNormalizedRotation2dAngle(),
                 getPose(),
-                new Pose2d(0, 0, getGyro().getAngle()),
+                new Pose2d(0, 0, getGyro().getNormalizedRotation2dAngle()),
                 stateStdDevs,
                 visionMeasurementStdDevs);
 
         setPrevPose(this.odom.getEstimatedPosition());
+
+        this.cameras = new ArrayList<Camera>();
+        for (CameraConfig cameraConfig : cameraConfigs) {
+            cameras.add(new Camera(cameraConfig));
+        }
     }
 
-    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics) {
+    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs) {
         this(swerveMods, gyro, kinematics, VecBuilder.fill(0.1, 0.1, 0.05),
-                VecBuilder.fill(0.9, 0.9, 0.9));
+                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs);
     }
 
-    public void addVisionTargets(List<EstimatedRobotPose> poses) {
-        for (int i = 0; i < poses.size(); ++i) {
-            odom.addVisionMeasurement(poses.get(i).estimatedPose.toPose2d(), poses.get(i).timestampSeconds);
+    public void updateVisionPoses() {
+        for (Camera camera : cameras) {
+            Optional<EstimatedRobotPose> estPose = camera.getEstimatedPose(getOdomPose());
+            if (estPose.isPresent()) {
+                odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), 
+                estPose.get().timestampSeconds, camera.getVisionStdDevs());
+            }
         }
     }
 
@@ -82,6 +96,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
-        odom.update(getGyro().getAngle(), getPose());
+        updateVisionPoses();
+        odom.update(getGyro().getNormalizedRotation2dAngle(), getPose());
     }
 }

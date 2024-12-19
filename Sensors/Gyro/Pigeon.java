@@ -5,6 +5,11 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * Encapsulates pigeon gyroscope.
@@ -30,23 +35,19 @@ public class Pigeon extends Gyro {
     }
 
     @Override
-    public Rotation2d getAngle() {
-        double yaw = getYaw();
-
-        return inversion 
-            ? Rotation2d.fromDegrees(MathUtil.inputModulus(360 - yaw, 0, 360))
-            : Rotation2d.fromDegrees(MathUtil.inputModulus(yaw, 0, 360));
+    public Angle getNormalizedAngle() {
+        return invertAndNormalizeAngle(getYaw());
     }
 
-    public double getYaw() {
+    public Angle getYaw() {
         return gyro.getYaw().getValue();
     }
 
-    public double getPitch() {
+    public Angle getPitch() {
         return gyro.getPitch().getValue();
     }
 
-    public double getRoll() {
+    public Angle getRoll() {
         return gyro.getRoll().getValue();
     }
 
@@ -61,18 +62,25 @@ public class Pigeon extends Gyro {
     }
 
     @Override
-    public double getAngularVelo() {
+    public AngularVelocity getAngularVelo() {
         return gyro.getAngularVelocityZDevice().getValue();
     }
 
+    @Override
+    public Angle getLatencyCompensatedAngle() {
+        Measure<AngleUnit> yaw = BaseStatusSignal.getLatencyCompensatedValue(gyro.getYaw().refresh(), gyro.getAngularVelocityZDevice().refresh());
+
+        return invertAndNormalizeAngle(yaw);
+    }
+
+    private Angle invertAndNormalizeAngle(Measure<AngleUnit> angle) {
+        return inversion ? Units.Degrees.of(MathUtil.inputModulus(360 - angle.in(Units.Degrees), 0, 360))
+                         : Units.Degrees.of(MathUtil.inputModulus(angle.in(Units.Degrees), 0, 360));
+    }
 
     @Override
-    public Rotation2d getLatencyCompensatedAngle() {
-        double yaw = BaseStatusSignal.getLatencyCompensatedValue(gyro.getYaw().refresh(), gyro.getAngularVelocityZDevice().refresh());;
-
-        return inversion 
-            ? Rotation2d.fromDegrees(MathUtil.inputModulus(360 - yaw, 0, 360))
-            : Rotation2d.fromDegrees(MathUtil.inputModulus(yaw, 0, 360));
+    public Rotation2d getNormalizedRotation2dAngle() {
+        return new Rotation2d(getNormalizedAngle());
     }
 
 }

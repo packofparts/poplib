@@ -1,24 +1,26 @@
 package POPLib.Swerve.SwerveConstants;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import POPLib.Motor.ConversionConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.Motor.MotorHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 
 /**
  * Wrapper class for swerve module constants.
+ * Angle motor encoders output in rotations 
+ * Drive motors output in meters
  */
 public class SwerveModuleConstants {
     public final int driveMotorId;
@@ -33,9 +35,8 @@ public class SwerveModuleConstants {
     public static NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
     public static IdleMode driveIdleMode = IdleMode.kBrake;
 
-    public final static double wheelCircumference = Units.inchesToMeters(4) * Math.PI;
-
-    public final double driveRotationsToMeters;
+    public final static Distance wheelCircumference = Units.Inches.of(4).times(Math.PI);
+    public final Distance driveDistancePerRotation;
 
     public final boolean swerveTuningMode;
 
@@ -58,12 +59,15 @@ public class SwerveModuleConstants {
 
         this.moduleInfo = moduleInfo;
 
-        driveRotationsToMeters = wheelCircumference * moduleInfo.driveGearRatio;
+        driveDistancePerRotation = wheelCircumference.times(moduleInfo.driveGearRatio);
 
         this.swerveTuningMode = swerveTuningMode;
 
         this.driveConfig = driveConfig;
+        this.driveConfig.conversion = new ConversionConfig(driveDistancePerRotation.in(Units.Meters), Units.Rotations);
+
         this.angleConfig = angleConfig;
+        angleConfig.conversion = new ConversionConfig(moduleInfo.angleGearRatio, Units.Rotations);
     }
 
     public SwerveModuleConstants(int moduleNumber, Rotation2d angleOffset, SDSModules moduleInfo,
@@ -133,46 +137,34 @@ public class SwerveModuleConstants {
         return ret;
         }
 
-    public CANSparkMax getDriveNeo() {
-        CANSparkMax neo = new CANSparkMax(driveMotorId, MotorType.kBrushless);
-        driveConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
-        MotorHelper.setConversionFactor(neo, driveRotationsToMeters);
-        return neo;
+    public SparkMax getDriveNeo() {
+        return driveConfig.setConfig(new SparkMax(driveMotorId, MotorType.kBrushless));
     }
 
     public TalonFX getDriveFalcon() {
-        TalonFX drive = new TalonFX(driveMotorId, Constants.Ports.CANIVORE_NAME);
-        TalonFXConfiguration config = driveConfig.getTalonConfig();
-        config.Feedback.SensorToMechanismRatio = moduleInfo.driveGearRatio;
-        drive.getConfigurator().apply(config);
-        return drive;
+        return driveConfig.setConfig(new TalonFX(driveMotorId, driveConfig.canBus));
     }
 
-    public CANSparkMax getAngleNeo() {
-        CANSparkMax neo = new CANSparkMax(angleMotorId, MotorType.kBrushless);
-        angleConfig.setCanSparkMaxConfig(neo, MotorType.kBrushless);
-        MotorHelper.setDegreeConversionFactor(neo, moduleInfo.angleGearRatio);
+    public SparkMax getAngleNeo() {
+        SparkMax neo = new SparkMax(angleMotorId, MotorType.kBrushless);
+        SparkMaxConfig config = angleConfig.getSparkMaxConfig();
+        config.closedLoop.positionWrappingEnabled(true);
+        config.closedLoop.positionWrappingMinInput(0);
+        config.closedLoop.positionWrappingMaxInput(360);
 
-        neo.getPIDController().setPositionPIDWrappingEnabled(true);
-        neo.getPIDController().setPositionPIDWrappingMinInput(0);
-        neo.getPIDController().setPositionPIDWrappingMinInput(360);
+        MotorHelper.applySparkMaxConfig(config, neo, ResetMode.kResetSafeParameters);
 
         return neo;
     }
 
     public TalonFX getAngleFalcon() {
-        TalonFX angle = new TalonFX(angleMotorId, Constants.Ports.CANIVORE_NAME);
-        TalonFXConfiguration config = angleConfig.getTalonConfig();
-        MotorHelper.setDegreeConversionFactor(config, moduleInfo.angleGearRatio);
-        angle.getConfigurator().apply(config);
-        return angle;
+        return angleConfig.setConfig(new TalonFX(angleMotorId, angleConfig.canBus));
     }
 
     public CANcoder getCanCoder() {
-        CANcoder angleEncoder = new CANcoder(cancoderId, Constants.Ports.CANIVORE_NAME);
+        CANcoder angleEncoder = new CANcoder(cancoderId, angleConfig.canBus);
 
         CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         config.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
 

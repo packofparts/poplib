@@ -12,10 +12,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -39,7 +42,6 @@ abstract public class BaseSwerve extends SubsystemBase {
     private Translation2d lastTranslationVector;
     private double lastTranslationVectorTime;
 
-    public static final double GYRO_LATENCY_COMPENSTATION = 0.0;
     public static final double MAX_SKID_ACCEL = 100.0;
     public static final double MAX_X_TILT_ACCEL = 100.0;    
     public static final double MAX_Y_TILT_ACCEL = 0.5;
@@ -54,8 +56,8 @@ abstract public class BaseSwerve extends SubsystemBase {
 
         this.field = new Field2d();
 
-        this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed;
-        this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity;
+        this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed.in(Units.MetersPerSecond);
+        this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity.in(Units.RadiansPerSecond);
 
         lastTranslationVector = new Translation2d();
         lastTranslationVectorTime = Timer.getFPGATimestamp();
@@ -133,11 +135,9 @@ abstract public class BaseSwerve extends SubsystemBase {
         vector = vector.times(maxSpeed);
         rot *= maxAngularVelocity;
 
-        vector = vector.rotateBy(
-                        Rotation2d.fromRadians(gyro.getAngularVelo() * GYRO_LATENCY_COMPENSTATION).plus(
-                                Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0)).minus(gyro.getAngle())); // We are adding a value for
-                                                                                        //    latency conpensation,
-                                                                                        //    currently untuned
+        vector = vector.rotateBy(new Rotation2d(
+            Units.Degrees.of(color == Alliance.Red ? 180 : 0).minus(gyro.getNormalizedAngle())
+        ));
 
         // vector = vector.rotateBy(Rotation2d.fromDegrees(color == Alliance.Red ? 180 : 0).minus(gyro.getLatencyCompensatedAngle())); //TODO: TEST
 
@@ -164,7 +164,7 @@ abstract public class BaseSwerve extends SubsystemBase {
         double[] ret = new double[4];
 
         for (SwerveModule i : swerveMods) {
-            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionRotationRadians();
+            ret[i.swerveModuleConstants.moduleNumber] = i.getPositionAngle().in(Units.Radians);
         }
 
         return ret;
@@ -178,6 +178,18 @@ abstract public class BaseSwerve extends SubsystemBase {
         }
 
         return ret;
+    }
+
+    public void runSysIdRoutine(Voltage voltage) {
+        for (SwerveModule i : swerveMods) {
+            i.runSysIdRoutine(voltage.in(Units.Volt));
+        }
+    }
+
+    public void sysIdLogMotors(SysIdRoutineLog log) {
+        for (SwerveModule i : swerveMods) {
+            i.logSysId(log);
+        }
     }
 
     protected void setGyro(Pose2d pose) {
@@ -216,7 +228,7 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Angle", MathUtil.inputModulus(gyro.getAngle().getDegrees(), 0, 360));
+        SmartDashboard.putNumber("Angle", MathUtil.inputModulus(gyro.getNormalizedAngle().in(Units.Degrees), 0, 360));
 
         if (tuningMode) {
             SmartDashboard.putNumber("Robot Angle Velo", getAngleVelo());

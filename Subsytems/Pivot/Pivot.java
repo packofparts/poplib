@@ -1,10 +1,8 @@
 package POPLib.Subsytems.Pivot;
 
 import POPLib.Control.ArmFFConfig;
-import POPLib.Sensors.AbsoluteEncoder.DutyCycleAbsoluteEncoder;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoder;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
-import POPLib.SmartDashboard.PIDTuning;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

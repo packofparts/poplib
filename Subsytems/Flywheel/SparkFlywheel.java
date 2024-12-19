@@ -1,24 +1,23 @@
 package POPLib.Subsytems.Flywheel;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkMax;
 import POPLib.Math.MathUtil;
+import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.SmartDashboard.PIDTuning;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SparkFlywheel extends Flywheel {
-    CANSparkMax leadMotor; 
-    CANSparkMax followerMotor; 
+    SparkMax leadMotor; 
+    SparkMax followerMotor; 
     PIDTuning leadPidTuning;
  
-    protected SparkFlywheel(MotorConfig leadConfig, MotorConfig followerConfig, String subsytemName, boolean tuningMode, boolean motorsInverted) {
+    protected SparkFlywheel(MotorConfig leadConfig, FollowerConfig followerConfig, String subsytemName, boolean tuningMode) {
         super(subsytemName, tuningMode);
 
         this.leadMotor = leadConfig.createSparkMax();
-        this.followerMotor = followerConfig.createSparkMax();
-
-        followerMotor.follow(leadMotor, motorsInverted);
+        this.followerMotor = followerConfig.createSparkMax(leadMotor);
     } 
 
     public double getError(double setpoint) {
@@ -32,6 +31,6 @@ public class SparkFlywheel extends Flywheel {
     @Override
     public void periodic() {
         leadPidTuning.updatePID(leadMotor);
-        leadMotor.getPIDController().setReference(setpoint.get(), ControlType.kVelocity);
+        leadMotor.getClosedLoopController().setReference(setpoint.get(), ControlType.kVelocity);
     }
 }

@@ -1,24 +1,28 @@
 package POPLib.Swerve.SwerveModules;
 
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import POPLib.Math.Conversion;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkMax;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 
 public class SwerveModuleNeoTalon extends SwerveModule {
     private final TalonFX driveMotor;
     private final VelocityDutyCycle drivePID;
+    private final VoltageOut driveVoltage;
 
-    private final CANSparkMax angleMotor;
+    private final SparkMax angleMotor;
     private final RelativeEncoder angleEncoder;
-    private final SparkPIDController anglePID;
+    private final SparkClosedLoopController anglePID;
 
     public SwerveModuleNeoTalon(SwerveModuleConstants constants) {
         super(constants);
@@ -26,61 +30,59 @@ public class SwerveModuleNeoTalon extends SwerveModule {
 
         angleMotor = constants.getAngleNeo();
         angleEncoder = angleMotor.getEncoder();
-        anglePID = angleMotor.getPIDController();
+        anglePID = angleMotor.getClosedLoopController();
 
         resetToAbsolute();
 
-        drivePID = new VelocityDutyCycle(0, 0, false, 0,0, false, false, false); 
+        drivePID = new VelocityDutyCycle(0); 
+        driveVoltage = new VoltageOut(0.0);
         lastAngle = getPose().angle;
     }
 
 
     @Override
     public void resetToAbsolute() {
-        angleEncoder.setPosition(getCanCoder().getDegrees()); 
+        angleEncoder.setPosition(getCanCoder().getRotations()); 
         lastAngle = getCanCoder();
     }
 
     @Override
-    public void log() {
-        if (swerveModuleConstants.swerveTuningMode) {
-            // SmartDashboard.putNumber("Angle Current " + swerveModuleConstants.moduleNumber, angleMotor.getOutputCurrent());
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle " + swerveModuleConstants.moduleNumber, angleEncoder.getPosition());
-            SmartDashboard.putNumber("Current Reltaive Encoder Angle Mod " + swerveModuleConstants.moduleNumber, MathUtil.inputModulus(angleEncoder.getPosition(), 0, 360));
-            SmartDashboard.putNumber("Current Drive Velocity" + swerveModuleConstants.moduleNumber, Conversion.RPSToMPS(driveMotor.getVelocity().getValue(), SwerveModuleConstants.wheelCircumference));
-            SmartDashboard.putNumber("CanCoder Angle" + swerveModuleConstants.moduleNumber, getAbsoluteAngleDegrees());
-        }
-    }
-
-    @Override
     protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians) {
-        driveMotor.setControl(drivePID.withVelocity(Conversion.MPSToRPS(velocityMPS, SwerveModuleConstants.wheelCircumference))); 
-        anglePID.setReference(angleRadians.getDegrees(), CANSparkMax.ControlType.kPosition);
-
-        if (swerveModuleConstants.swerveTuningMode) {
-            SmartDashboard.putNumber("Target Drive Velocity: " + swerveModuleConstants.moduleNumber, velocityMPS);
-            SmartDashboard.putNumber("Target Relative Encoder Angle " + swerveModuleConstants.moduleNumber, angleRadians.getDegrees());
-        }
+        driveMotor.setControl(drivePID.withVelocity(velocityMPS)); 
+        anglePID.setReference(angleRadians.getRotations(), SparkMax.ControlType.kPosition);
     }
 
     @Override
-    protected Rotation2d getEncoderAngle() {
-        return Rotation2d.fromDegrees(angleEncoder.getPosition());
+    protected Angle getAngle() {
+        return Units.Rotations.of(angleEncoder.getPosition());
     }
 
     @Override
-    protected double getPositionMeter() {
-        return Conversion.rotationsToM(driveMotor.getPosition().getValue(), SwerveModuleConstants.wheelCircumference);
+    protected Distance getPosition() {
+        return Units.Meters.of(driveMotor.getPosition().getValueAsDouble());
     }
 
     @Override
-    protected double getVelocityMeter() {
-        return Conversion.RPSToMPS(driveMotor.getVelocity().getValue(), SwerveModuleConstants.wheelCircumference);
+    protected LinearVelocity getVelocity() {
+        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble());
     }
 
     @Override
     public void updatePID(PIDTuning angle, PIDTuning drive) {
         angle.updatePID(angleMotor);
         drive.updatePID(driveMotor);
+    }
+
+
+    @Override
+    public void runSysIdRoutine(double voltage) {
+        driveMotor.setControl(driveVoltage.withOutput(voltage)); 
+        anglePID.setReference(0.0, SparkMax.ControlType.kPosition);    
+    }
+
+
+    @Override
+    protected Voltage getDriveVoltage() {
+        return driveMotor.getMotorVoltage().getValue();
     }
 }

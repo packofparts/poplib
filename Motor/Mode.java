@@ -1,7 +1,7 @@
 package POPLib.Motor;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public enum Mode {
     COAST(true),
