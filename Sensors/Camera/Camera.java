@@ -36,7 +36,7 @@ public class Camera {
 
     public Optional<EstimatedRobotPose> getEstimatedPose(Pose2d currPose) {
         if (!camera.isConnected()) {
-            DriverStation.reportWarning("Camera named: " + config.cameraName + " is not connected!!!!!!!!", false);
+            DriverStation.reportError("Camera named: " + config.cameraName + " is not connected!!!!!!!!", false);
             // the above code should save to the log file that you can view in the DS Log Viewer
             return Optional.empty();
         }
