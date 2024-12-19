@@ -11,13 +11,13 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class Camera {
     private final PhotonCamera camera;
@@ -29,13 +29,15 @@ public class Camera {
     public Camera(CameraConfig config) {
         this.config = config;
         camera = new PhotonCamera(config.cameraName);
-        AprilTagFieldLayout aprilTags = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+        AprilTagFieldLayout aprilTags = AprilTagFieldLayout.loadField(config.aprilTagField);
         poseEstimator = new PhotonPoseEstimator(aprilTags, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, config.cameraToRobot);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     }
 
     public Optional<EstimatedRobotPose> getEstimatedPose(Pose2d currPose) {
         if (!camera.isConnected()) {
+            DriverStation.reportWarning("Camera named: " + config.cameraName + " is not connected!!!!!!!!", false);
+            // the above code should save to the log file that you can view in the DS Log Viewer
             return Optional.empty();
         }
         poseEstimator.setReferencePose(currPose);
@@ -70,7 +72,7 @@ public class Camera {
                         visionEst.get().estimatedPose.toPose2d().getTranslation());
                     }
                 } else if (config.stdDevStategy == StdDevStategy.AMBIGUITY) {
-                    avg += target.poseAmbiguity;
+                    avg += target.getPoseAmbiguity();
                     numTags++;
                 }
             }
@@ -101,10 +103,20 @@ public class Camera {
 
     private boolean isValidPose(EstimatedRobotPose pose) {
         List<PhotonTrackedTarget> targets = pose.targetsUsed;
+        double max_dist = 0;
+        for (PhotonTrackedTarget target : targets) {
+            Optional<Pose3d> tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+            if (tagPose.isPresent()) {
+                max_dist = Math.max(max_dist, tagPose.get().toPose2d().getTranslation().
+                getDistance(pose.estimatedPose.toPose2d().getTranslation()));
+            }
+        }
+        if (max_dist > config.poseDistanceThreshold) {
+            return false;
+        }
         if (targets.size() == 1) {
             return targets.get(0).getPoseAmbiguity() >= config.poseAmbiguityThreshold;
         }
         return true;
     }
-
 }

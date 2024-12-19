@@ -42,8 +42,8 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
         setPrevPose(this.odom.getEstimatedPosition());
 
         this.cameras = new ArrayList<Camera>();
-        for (int i = 0; i < cameraConfigs.size(); i++) {
-            cameras.add(new Camera(cameraConfigs.get(i)));
+        for (CameraConfig cameraConfig : cameraConfigs) {
+            cameras.add(new Camera(cameraConfig));
         }
     }
 
@@ -53,11 +53,11 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     }
 
     public void updateVisionPoses() {
-        for (int i = 0; i < cameras.size(); i++) {
-            Optional<EstimatedRobotPose> estPose = cameras.get(i).getEstimatedPose(getOdomPose());
+        for (Camera camera : cameras) {
+            Optional<EstimatedRobotPose> estPose = camera.getEstimatedPose(getOdomPose());
             if (estPose.isPresent()) {
                 odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), 
-                estPose.get().timestampSeconds, cameras.get(i).getVisionStdDevs());
+                estPose.get().timestampSeconds, camera.getVisionStdDevs());
             }
         }
     }
@@ -96,6 +96,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
+        updateVisionPoses();
         odom.update(getGyro().getNormalizedRotation2dAngle(), getPose());
     }
 }
