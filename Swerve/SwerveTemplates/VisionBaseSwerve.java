@@ -53,10 +53,11 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     }
 
     public void updateVisionPoses() {
-        for (int i = 0; i < cameras.size(); ++i) {
+        for (int i = 0; i < cameras.size(); i++) {
             Optional<EstimatedRobotPose> estPose = cameras.get(i).getEstimatedPose(getOdomPose());
             if (estPose.isPresent()) {
-                odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), estPose.get().timestampSeconds);
+                odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), 
+                estPose.get().timestampSeconds, cameras.get(i).getVisionStdDevs());
             }
         }
     }

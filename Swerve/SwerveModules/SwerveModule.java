@@ -116,7 +116,7 @@ public abstract class SwerveModule {
     public abstract void runSysIdRoutine(double voltage);
 
     public LinearVelocity accelLimit(LinearVelocity newVelocity) {
-        LinearVelocity velocityChange = newVelocity.minus(lastVelo);
+        // LinearVelocity velocityChange = newVelocity.minus(lastVelo);
         Time ellapsedTime = Units.Seconds.of(Timer.getFPGATimestamp()).minus(lastVeloTime);
 
         // TODO: Update

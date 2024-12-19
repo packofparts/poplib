@@ -12,12 +12,19 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 
 public class Camera {
     private final PhotonCamera camera;
     private final CameraConfig config;
     private PhotonPoseEstimator poseEstimator;
+    private final Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
+    private Matrix<N3, N1> currStdDevs = null;
 
     public Camera(CameraConfig config) {
         this.config = config;
@@ -35,12 +42,62 @@ public class Camera {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         for (PhotonPipelineResult change : camera.getAllUnreadResults()) {
             visionEst = poseEstimator.update(change);
+            updateStdDevs(visionEst, change.getTargets());
         }
         if (visionEst.isPresent() && isValidPose(visionEst.get())) {
             return visionEst;
         }
         return Optional.empty();
-    } 
+    }
+
+    public Matrix<N3, N1> getVisionStdDevs() {
+        return currStdDevs;
+    }
+
+    private void updateStdDevs(Optional<EstimatedRobotPose> visionEst, List<PhotonTrackedTarget> targets) {
+        if (visionEst.isEmpty()) {
+            currStdDevs = singleTagStdDevs;
+        } else {
+            Matrix<N3, N1> stdDevs = singleTagStdDevs;
+            int numTags = 0;
+            double avg = 0;
+            for (PhotonTrackedTarget target : targets) {
+                if (config.stdDevStategy == StdDevStategy.DISTANCE) {
+                    Optional<Pose3d> tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+                    if (tagPose.isPresent()) {
+                        numTags++;
+                        avg += tagPose.get().toPose2d().getTranslation().getDistance(
+                        visionEst.get().estimatedPose.toPose2d().getTranslation());
+                    }
+                } else if (config.stdDevStategy == StdDevStategy.AMBIGUITY) {
+                    avg += target.poseAmbiguity;
+                    numTags++;
+                }
+            }
+            if (numTags == 0) {
+                currStdDevs = singleTagStdDevs;
+            } else {
+                avg /= numTags;
+                if (numTags > 1) {
+                    stdDevs = VecBuilder.fill(0.5, 0.5, 1);
+                }
+                if (config.stdDevStategy == StdDevStategy.DISTANCE) {
+                    if (numTags == 1 && avg > 4) {
+                        stdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);  // tag too unreliable
+                    } else {
+                        stdDevs = stdDevs.times(1 + (avg * avg / 30));
+                    }
+                } else if (config.stdDevStategy == StdDevStategy.AMBIGUITY) {
+                    if (avg > 0.4) {    // ur cooked lil bro
+                        stdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+                    } else {
+                        stdDevs = stdDevs.times(1 + (avg * avg * 30));
+                    }
+                }
+                currStdDevs = stdDevs;
+            }
+        }
+    }
 
     private boolean isValidPose(EstimatedRobotPose pose) {
         List<PhotonTrackedTarget> targets = pose.targetsUsed;
@@ -49,4 +106,5 @@ public class Camera {
         }
         return true;
     }
+
 }
