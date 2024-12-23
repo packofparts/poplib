@@ -11,6 +11,7 @@ import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -64,7 +65,17 @@ public class SwerveModuleNeoTalon extends SwerveModule {
 
     @Override
     protected LinearVelocity getVelocity() {
-        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble());
+        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble() * swerveModuleConstants.wheelCircumference.divide(2*Math.PI).magnitude());
+    }
+
+    @Override
+    protected Current getDriveCurrent() {
+        return Units.Amps.of(driveMotor.getStatorCurrent().getValueAsDouble());
+    }
+
+    @Override
+    protected Current getTurnCurrent() {
+        return Units.Amps.of(angleMotor.getOutputCurrent());
     }
 
     @Override
@@ -84,5 +95,10 @@ public class SwerveModuleNeoTalon extends SwerveModule {
     @Override
     protected Voltage getDriveVoltage() {
         return driveMotor.getMotorVoltage().getValue();
+    }
+
+    @Override
+    protected Voltage getTurnVoltage() {
+        return Units.Volts.of(angleMotor.getBusVoltage());
     }
 }

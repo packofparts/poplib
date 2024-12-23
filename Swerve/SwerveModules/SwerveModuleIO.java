@@ -6,101 +6,37 @@ import java.lang.Cloneable;
 import java.lang.Override;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.*;
 
 
 public interface SwerveModuleIO {
     @AutoLog
-    public static class ModuleIOInputsAutoLogged implements LoggableInputs, Cloneable{
-        public boolean driveConnected = false;
-        public double drivePositionRad = 0.0;
-        public double driveVelocityRadPerSec = 0.0;
-        public double driveAppliedVolts = 0.0;
-        public double driveCurrentAmps = 0.0;
-    
-        public boolean turnConnected = false;
-        public boolean turnEncoderConnected = false;
-        public Rotation2d turnAbsolutePosition = new Rotation2d();
-        public Rotation2d turnPosition = new Rotation2d();
-        public double turnVelocityRadPerSec = 0.0;
-        public double turnAppliedVolts = 0.0;
-        public double turnCurrentAmps = 0.0;
-    
-        public double[] odometryTimestamps = new double[] {};
-        public double[] odometryDrivePositionsRad = new double[] {};
-        public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
+    public static class ModuleIOInputs {
 
-        @Override
-        public void toLog(LogTable table) {
-          table.put("DriveConnected", driveConnected);
-          table.put("DrivePositionRad", drivePositionRad);
-          table.put("DriveVelocityRadPerSec", driveVelocityRadPerSec);
-          table.put("DriveAppliedVolts", driveAppliedVolts);
-          table.put("DriveCurrentAmps", driveCurrentAmps);
-          table.put("TurnConnected", turnConnected);
-          table.put("TurnEncoderConnected", turnEncoderConnected);
-          table.put("TurnAbsolutePosition", turnAbsolutePosition);
-          table.put("TurnPosition", turnPosition);
-          table.put("TurnVelocityRadPerSec", turnVelocityRadPerSec);
-          table.put("TurnAppliedVolts", turnAppliedVolts);
-          table.put("TurnCurrentAmps", turnCurrentAmps);
-          table.put("OdometryTimestamps", odometryTimestamps);
-          table.put("OdometryDrivePositionsRad", odometryDrivePositionsRad);
-          table.put("OdometryTurnPositions", odometryTurnPositions);
-        }
-        
-        @Override
-        public void fromLog(LogTable table) {
-          driveConnected = table.get("DriveConnected", driveConnected);
-          drivePositionRad = table.get("DrivePositionRad", drivePositionRad);
-          driveVelocityRadPerSec = table.get("DriveVelocityRadPerSec", driveVelocityRadPerSec);
-          driveAppliedVolts = table.get("DriveAppliedVolts", driveAppliedVolts);
-          driveCurrentAmps = table.get("DriveCurrentAmps", driveCurrentAmps);
-          turnConnected = table.get("TurnConnected", turnConnected);
-          turnEncoderConnected = table.get("TurnEncoderConnected", turnEncoderConnected);
-          turnAbsolutePosition = table.get("TurnAbsolutePosition", turnAbsolutePosition);
-          turnPosition = table.get("TurnPosition", turnPosition);
-          turnVelocityRadPerSec = table.get("TurnVelocityRadPerSec", turnVelocityRadPerSec);
-          turnAppliedVolts = table.get("TurnAppliedVolts", turnAppliedVolts);
-          turnCurrentAmps = table.get("TurnCurrentAmps", turnCurrentAmps);
-          odometryTimestamps = table.get("OdometryTimestamps", odometryTimestamps);
-          odometryDrivePositionsRad = table.get("OdometryDrivePositionsRad", odometryDrivePositionsRad);
-          odometryTurnPositions = table.get("OdometryTurnPositions", odometryTurnPositions);
-        }
-        
-        public ModuleIOInputsAutoLogged clone() {
-          ModuleIOInputsAutoLogged copy = new ModuleIOInputsAutoLogged();
-          copy.driveConnected = this.driveConnected;
-          copy.drivePositionRad = this.drivePositionRad;
-          copy.driveVelocityRadPerSec = this.driveVelocityRadPerSec;
-          copy.driveAppliedVolts = this.driveAppliedVolts;
-          copy.driveCurrentAmps = this.driveCurrentAmps;
-          copy.turnConnected = this.turnConnected;
-          copy.turnEncoderConnected = this.turnEncoderConnected;
-          copy.turnAbsolutePosition = this.turnAbsolutePosition;
-          copy.turnPosition = this.turnPosition;
-          copy.turnVelocityRadPerSec = this.turnVelocityRadPerSec;
-          copy.turnAppliedVolts = this.turnAppliedVolts;
-          copy.turnCurrentAmps = this.turnCurrentAmps;
-          copy.odometryTimestamps = this.odometryTimestamps.clone();
-          copy.odometryDrivePositionsRad = this.odometryDrivePositionsRad.clone();
-          copy.odometryTurnPositions = this.odometryTurnPositions.clone();
-          return copy;
-        }
-      }
+      public Rotation2d moduleRotation = new Rotation2d();
+      public SwerveModuleState swerveState = new SwerveModuleState();
+      public SwerveModulePosition swervePose = new SwerveModulePosition();
+
+      public Distance driveMotorDistance = Units.Meters.zero();
+      public LinearVelocity driveVelocityMetersPerSec = Units.MetersPerSecond.zero();
+      public Current driveCurrentAmps = Units.Amps.zero();
+      public Voltage driveAppliedVolts = Units.Volts.zero();
+  
+      public Rotation2d turnEncoderPosition = new Rotation2d();
+      public Rotation2d turnMotorPosition = new Rotation2d();
+      public Current turnCurrentAmps = Units.Amps.zero();
+      public Voltage turnAppliedVolts = Units.Volts.zero();
+  
+      public double[] odometryTimestamps = new double[] {};
+      public double[] odometryDrivePositionsRad = new double[] {};
+      public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
+    }
     
     /** Updates the set of loggable inputs. */
     public default void updateInputs(ModuleIOInputsAutoLogged inputs) {}
 
-    /** Run the drive motor at the specified open loop value. */
-    public default void setDriveOpenLoop(double output) {}
-
-    /** Run the turn motor at the specified open loop value. */
-    public default void setTurnOpenLoop(double output) {}
-
-    /** Run the drive motor at the specified velocity. */
-    public default void setDriveVelocity(double velocityRadPerSec) {}
-
-    /** Run the turn motor to the specified rotation. */
-    public default void setTurnPosition(Rotation2d rotation) {}
 
 }

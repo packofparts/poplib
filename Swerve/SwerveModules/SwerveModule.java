@@ -5,7 +5,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.CTREModuleState;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
-import POPLib.Swerve.SwerveModules.SwerveModuleIO.ModuleIOInputsAutoLogged;
+import POPLib.Swerve.SwerveModules.SwerveModuleIO.ModuleIOInputs;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -17,6 +17,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -26,9 +27,6 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
-
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
 
 public abstract class SwerveModule implements SwerveModuleIO{
@@ -37,10 +35,6 @@ public abstract class SwerveModule implements SwerveModuleIO{
     protected Rotation2d lastAngle;
 
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-    
-    private final Alert driveDisconnectedAlert;
-    private final Alert turnDisconnectedAlert;
-    private final Alert turnEncoderDisconnectedAlert;
 
     protected LinearVelocity lastVelo;
     protected Time lastVeloTime;
@@ -52,19 +46,6 @@ public abstract class SwerveModule implements SwerveModuleIO{
 
         lastVelo = Units.MetersPerSecond.of(0.0);
         lastVeloTime = Units.Seconds.of(Timer.getFPGATimestamp());
-
-        // Create Alerts for Disconnected components
-        driveDisconnectedAlert =
-            new Alert(
-                "Disconnected drive motor on module " + Integer.toString(moduleConstants.moduleNumber) + ".",
-                AlertType.kError);
-        turnDisconnectedAlert =
-            new Alert(
-                "Disconnected turn motor on module " + Integer.toString(moduleConstants.moduleNumber) + ".", AlertType.kError);
-        turnEncoderDisconnectedAlert =
-            new Alert(
-                "Disconnected turn encoder on module " + Integer.toString(moduleConstants.moduleNumber) + ".",
-                AlertType.kError);
     }
 
     // Resets swerve module to the cancoder angle
@@ -77,6 +58,9 @@ public abstract class SwerveModule implements SwerveModuleIO{
     abstract protected Distance getPosition();
     abstract protected LinearVelocity getVelocity();
     abstract protected Voltage getDriveVoltage();
+    abstract protected Voltage getTurnVoltage();
+    abstract protected Current getDriveCurrent();
+    abstract protected Current getTurnCurrent();
 
     public void logSysId(SysIdRoutineLog log) {
         log.motor("Drive " + swerveModuleConstants.moduleNumber)
@@ -172,17 +156,24 @@ public abstract class SwerveModule implements SwerveModuleIO{
     public void updateInputs(ModuleIOInputsAutoLogged inputs) {
         // Yet to be implemented
         
+        // Update Drive Inputs
+        inputs.driveMotorDistance = getPosition();
+        inputs.driveVelocityMetersPerSec = getVelocity();
+        inputs.driveCurrentAmps = getDriveCurrent();
+        inputs.driveAppliedVolts = getDriveVoltage();
 
+        // Update Current Inputs
+        inputs.turnEncoderPosition = getRotation2dAngle();
+        inputs.turnMotorPosition = Rotation2d.fromRotations(getAngle().magnitude());
+        inputs.turnCurrentAmps = getTurnCurrent();
+        inputs.turnAppliedVolts = getTurnVoltage();
+        
         
     }
 
     public void periodic() {
         updateInputs(inputs);
-        Logger.processInputs("Drive/Module" + Integer.toString(swerveModuleConstants.moduleNumber), inputs);
+        Logger.processInputs("Drive/Module" + swerveModuleConstants.moduleNumber, inputs);
 
-        // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveConnected);
-        turnDisconnectedAlert.set(!inputs.turnConnected);
-        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
     }
 }
