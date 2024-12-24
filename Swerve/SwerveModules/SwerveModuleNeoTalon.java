@@ -65,7 +65,8 @@ public class SwerveModuleNeoTalon extends SwerveModule {
 
     @Override
     protected LinearVelocity getVelocity() {
-        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble() * swerveModuleConstants.wheelCircumference.divide(2*Math.PI).magnitude());
+        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble() * 
+        swerveModuleConstants.wheelCircumference.divide(2*Math.PI).magnitude());
     }
 
     @Override

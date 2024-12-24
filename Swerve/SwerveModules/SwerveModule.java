@@ -5,7 +5,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.CTREModuleState;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
-import POPLib.Swerve.SwerveModules.SwerveModuleIO.ModuleIOInputs;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -27,9 +26,10 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
-public abstract class SwerveModule implements SwerveModuleIO{
+public abstract class SwerveModule {
     public SwerveModuleConstants swerveModuleConstants;
     protected CANcoder angleEncoder;
     protected Rotation2d lastAngle;
@@ -38,6 +38,23 @@ public abstract class SwerveModule implements SwerveModuleIO{
 
     protected LinearVelocity lastVelo;
     protected Time lastVeloTime;
+
+    @AutoLog
+    public static class ModuleIOInputs {
+
+      public SwerveModuleState swerveState = new SwerveModuleState();
+      public SwerveModulePosition swervePose = new SwerveModulePosition();
+
+      public Distance driveMotorDistance = Units.Meters.zero();
+      public LinearVelocity driveVelocityMetersPerSec = Units.MetersPerSecond.zero();
+      public Current driveCurrentAmps = Units.Amps.zero();
+      public Voltage driveAppliedVolts = Units.Volts.zero();
+  
+      public Rotation2d turnEncoderPosition = new Rotation2d();
+      public Rotation2d turnMotorPosition = new Rotation2d();
+      public Current turnCurrentAmps = Units.Amps.zero();
+      public Voltage turnAppliedVolts = Units.Volts.zero();
+    }
 
     public SwerveModule(SwerveModuleConstants moduleConstants) {
         angleEncoder = moduleConstants.getCanCoder();
@@ -151,10 +168,10 @@ public abstract class SwerveModule implements SwerveModuleIO{
         return newVelocity;
     }
 
-
-    @Override
     public void updateInputs(ModuleIOInputsAutoLogged inputs) {
-        // Yet to be implemented
+        // Update State and Pose
+        inputs.swerveState = getState();
+        inputs.swervePose = getPose();
         
         // Update Drive Inputs
         inputs.driveMotorDistance = getPosition();
@@ -174,6 +191,5 @@ public abstract class SwerveModule implements SwerveModuleIO{
     public void periodic() {
         updateInputs(inputs);
         Logger.processInputs("Drive/Module" + swerveModuleConstants.moduleNumber, inputs);
-
     }
 }
