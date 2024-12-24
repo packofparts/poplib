@@ -1,12 +1,13 @@
 package POPLib.Sensors.Camera;
 
+import java.util.Optional;
+
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Limelight {
     private NetworkTable networkTable;
-    private LimelightConfig config.
+    private LimelightConfig config;
 
     public Limelight(LimelightConfig config) {
         this.config = config;
@@ -16,13 +17,15 @@ public class Limelight {
 
     }
 
-    public DetectedObject getLastestDetection() {
+    public Optional<DetectedObject> getLastestDetection() {
         double area = networkTable.getEntry("ta").getDouble(0.0);
-        return new DetectedObject(
-            networkTable.getEntry("tx").getDouble(0.0),
-            networkTable.getEntry("ty").getDouble(0.0), area,
-            networkTable.getEntry("tclass").getString(""),
-            (networkTable.getEntry("tv").getInteger(0) == 1 && area > minValidArea) ? true : false
-        );
+        if (networkTable.getEntry("tv").getInteger(0) == 1 && area > config.minValidArea) {
+            return Optional.of(new DetectedObject(
+                networkTable.getEntry("tx").getDouble(0.0),
+                networkTable.getEntry("ty").getDouble(0.0), area,
+                networkTable.getEntry("tclass").getString("")
+            ));
+        }
+        return Optional.empty();
     }
 }
