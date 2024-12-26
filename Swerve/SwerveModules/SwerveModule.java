@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -48,12 +49,11 @@ public abstract class SwerveModule {
       public Distance driveMotorDistance = Units.Meters.zero();
       public LinearVelocity driveVelocityMetersPerSec = Units.MetersPerSecond.zero();
       public Current driveCurrentAmps = Units.Amps.zero();
-      public Voltage driveAppliedVolts = Units.Volts.zero();
   
       public Rotation2d turnEncoderPosition = new Rotation2d();
       public Rotation2d turnMotorPosition = new Rotation2d();
+      public AngularVelocity turnVelocityRadPerSec = Units.RadiansPerSecond.zero();
       public Current turnCurrentAmps = Units.Amps.zero();
-      public Voltage turnAppliedVolts = Units.Volts.zero();
     }
 
     public SwerveModule(SwerveModuleConstants moduleConstants) {
@@ -74,6 +74,7 @@ public abstract class SwerveModule {
     abstract protected Angle getAngle();
     abstract protected Distance getPosition();
     abstract protected LinearVelocity getVelocity();
+    abstract protected AngularVelocity getTurnAngularVelocity();
     abstract protected Voltage getDriveVoltage();
     abstract protected Voltage getTurnVoltage();
     abstract protected Current getDriveCurrent();
@@ -177,15 +178,12 @@ public abstract class SwerveModule {
         inputs.driveMotorDistance = getPosition();
         inputs.driveVelocityMetersPerSec = getVelocity();
         inputs.driveCurrentAmps = getDriveCurrent();
-        inputs.driveAppliedVolts = getDriveVoltage();
 
         // Update Current Inputs
         inputs.turnEncoderPosition = getRotation2dAngle();
         inputs.turnMotorPosition = Rotation2d.fromRotations(getAngle().magnitude());
+        inputs.turnVelocityRadPerSec = getTurnAngularVelocity();
         inputs.turnCurrentAmps = getTurnCurrent();
-        inputs.turnAppliedVolts = getTurnVoltage();
-        
-        
     }
 
     public void periodic() {

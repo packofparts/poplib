@@ -8,6 +8,7 @@ import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -48,7 +49,16 @@ public class SwerveModuleNeo extends SwerveModule {
 
     @Override
     protected LinearVelocity getVelocity() {
-        return Units.MetersPerSecond.of(driveMotor.getEncoder().getVelocity());
+        // Convert from default units RPM to M/S
+        return Units.MetersPerSecond.of(driveMotor.getEncoder().getVelocity() *
+        SwerveModuleConstants.wheelCircumference.divide(60).magnitude());
+    }
+
+    @Override
+    protected AngularVelocity getTurnAngularVelocity() {
+        // Convert from default units RPM to Rad/S
+        return Units.RadiansPerSecond.of((angleMotor.getEncoder().getVelocity() / 60) *
+        2 * Math.PI);
     }
 
     @Override
