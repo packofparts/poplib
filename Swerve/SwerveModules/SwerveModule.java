@@ -59,7 +59,7 @@ public abstract class SwerveModule {
     }
 
     public Angle getPositionAngle() {
-        return Units.Rotations.of(getPosition().divide(SwerveModuleConstants.wheelCircumference).magnitude());
+        return Units.Rotations.of(getPosition().div(SwerveModuleConstants.wheelCircumference).magnitude());
     }
 
     public void log() {

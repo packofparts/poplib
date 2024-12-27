@@ -8,12 +8,17 @@ import org.photonvision.EstimatedRobotPose;
 
 import POPLib.Sensors.Camera.Camera;
 import POPLib.Sensors.Camera.CameraConfig;
+import POPLib.Sensors.Camera.DetectedObject;
+import POPLib.Sensors.Camera.Limelight;
+import POPLib.Sensors.Camera.LimelightConfig;
 import POPLib.Sensors.Gyro.Gyro;
 import POPLib.Swerve.SwerveModules.SwerveModule;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -25,9 +30,10 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     protected final SwerveDrivePoseEstimator odom;
     private final SwerveDriveKinematics kinematics;
     private ArrayList<Camera> cameras;
+    private Limelight limelight;
 
-    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics,
-            Matrix<N3, N1> stateStdDevs, Matrix<N3, N1> visionMeasurementStdDevs, List<CameraConfig> cameraConfigs) {
+    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, Matrix<N3, N1> stateStdDevs, 
+                            Matrix<N3, N1> visionMeasurementStdDevs, List<CameraConfig> cameraConfigs, LimelightConfig limelightConfig) {
         super(swerveMods, gyro);
         this.kinematics = kinematics;
 
@@ -45,11 +51,13 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
         for (CameraConfig cameraConfig : cameraConfigs) {
             cameras.add(new Camera(cameraConfig));
         }
+
+        limelight = new Limelight(limelightConfig);
     }
 
-    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs) {
+    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs, LimelightConfig limelightConfig) {
         this(swerveMods, gyro, kinematics, VecBuilder.fill(0.1, 0.1, 0.05),
-                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs);
+                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs, limelightConfig);
     }
 
     public void updateVisionPoses() {
@@ -60,6 +68,24 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
                 estPose.get().timestampSeconds, camera.getVisionStdDevs());
             }
         }
+    }
+
+    /**
+     * Method that will return an adjusted vector to nudge the robot closer to a game piece.
+     * The input should be relative to the robot, aka a Transform2d input with x = +1, y = -1, rot = pi 
+     * should move the robot 1 unit forward, 1 unit left, perform a 180 degree rotation
+     * @param driverInput a Transform2d of the driver-desired movement of the robot, relative to the robot
+     * @return an adjusted vector that will nudge the robot closer to the detected object
+     */
+    public Transform2d addVisionMovementAdjustment(Transform2d driverInput) {
+        Optional<DetectedObject> detection = limelight.getLastestDetection();
+        if (detection.isPresent()) {
+            return driverInput;
+        }
+        Rotation2d newAngle = driverInput.getRotation().plus(Rotation2d.fromDegrees(detection.get().xAngleOffset / 10));  // max offset is 2.6 degrees
+        double newY = driverInput.getY() + (detection.get().xAngleOffset / (26*2));   // max offset is 0.5 meters
+        double newX = driverInput.getX() + (1 / detection.get().area);    // max offset is 1/minValidDetectionArea as described in LimelightConfig
+        return new Transform2d(newX, newY, newAngle);
     }
 
     @Override
