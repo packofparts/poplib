@@ -49,15 +49,15 @@ public class SwerveModuleNeo extends SwerveModule {
 
     @Override
     protected LinearVelocity getVelocity() {
-        // Convert from default units RPM to M/S
+        // Convert from default units RPS to M/S
         return Units.MetersPerSecond.of(driveMotor.getEncoder().getVelocity() *
-        SwerveModuleConstants.wheelCircumference.divide(60).magnitude());
+        SwerveModuleConstants.wheelCircumference.magnitude());
     }
 
     @Override
     protected AngularVelocity getTurnAngularVelocity() {
-        // Convert from default units RPM to Rad/S
-        return Units.RadiansPerSecond.of((angleMotor.getEncoder().getVelocity() / 60) *
+        // Convert from default units RPS to Rad/S
+        return Units.RadiansPerSecond.of((angleMotor.getEncoder().getVelocity()) *
         2 * Math.PI);
     }
 

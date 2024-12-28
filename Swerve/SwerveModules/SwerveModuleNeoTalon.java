@@ -73,8 +73,8 @@ public class SwerveModuleNeoTalon extends SwerveModule {
 
     @Override
     protected AngularVelocity getTurnAngularVelocity() {
-        // Convert from default units RPM to Rad/S
-        return Units.RadiansPerSecond.of((angleMotor.getEncoder().getVelocity() / 60) *
+        // Convert from default units RPS to Rad/S
+        return Units.RadiansPerSecond.of((angleMotor.getEncoder().getVelocity()) *
         2 * Math.PI);
     }
 

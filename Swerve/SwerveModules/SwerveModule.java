@@ -35,7 +35,7 @@ public abstract class SwerveModule {
     protected CANcoder angleEncoder;
     protected Rotation2d lastAngle;
 
-    private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+    private final ModuleIOInputsAutoLogged inputs;
 
     protected LinearVelocity lastVelo;
     protected Time lastVeloTime;
@@ -47,19 +47,21 @@ public abstract class SwerveModule {
       public SwerveModulePosition swervePose = new SwerveModulePosition();
 
       public Distance driveMotorDistance = Units.Meters.zero();
-      public LinearVelocity driveVelocityMetersPerSec = Units.MetersPerSecond.zero();
-      public Current driveCurrentAmps = Units.Amps.zero();
+      public LinearVelocity driveLinearVelocity = Units.MetersPerSecond.zero();
+      public Current driveCurrent = Units.Amps.zero();
   
       public Rotation2d turnEncoderPosition = new Rotation2d();
       public Rotation2d turnMotorPosition = new Rotation2d();
-      public AngularVelocity turnVelocityRadPerSec = Units.RadiansPerSecond.zero();
-      public Current turnCurrentAmps = Units.Amps.zero();
+      public AngularVelocity turnAngularVelocity = Units.RadiansPerSecond.zero();
+      public Current turnCurrent = Units.Amps.zero();
     }
 
     public SwerveModule(SwerveModuleConstants moduleConstants) {
         angleEncoder = moduleConstants.getCanCoder();
         this.swerveModuleConstants = moduleConstants;
         lastAngle = Rotation2d.fromDegrees(0);
+
+        inputs = new ModuleIOInputsAutoLogged();
 
         lastVelo = Units.MetersPerSecond.of(0.0);
         lastVeloTime = Units.Seconds.of(Timer.getFPGATimestamp());
@@ -176,14 +178,14 @@ public abstract class SwerveModule {
         
         // Update Drive Inputs
         inputs.driveMotorDistance = getPosition();
-        inputs.driveVelocityMetersPerSec = getVelocity();
-        inputs.driveCurrentAmps = getDriveCurrent();
+        inputs.driveLinearVelocity = getVelocity();
+        inputs.driveCurrent = getDriveCurrent();
 
         // Update Current Inputs
         inputs.turnEncoderPosition = getRotation2dAngle();
         inputs.turnMotorPosition = Rotation2d.fromRotations(getAngle().magnitude());
-        inputs.turnVelocityRadPerSec = getTurnAngularVelocity();
-        inputs.turnCurrentAmps = getTurnCurrent();
+        inputs.turnAngularVelocity = getTurnAngularVelocity();
+        inputs.turnCurrent = getTurnCurrent();
     }
 
     public void periodic() {
