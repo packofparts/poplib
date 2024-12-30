@@ -30,10 +30,10 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     protected final SwerveDrivePoseEstimator odom;
     private final SwerveDriveKinematics kinematics;
     private ArrayList<Camera> cameras;
-    private Limelight limelight;
+    private ArrayList<Limelight> limelights;
 
     public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, Matrix<N3, N1> stateStdDevs, 
-                            Matrix<N3, N1> visionMeasurementStdDevs, List<CameraConfig> cameraConfigs, LimelightConfig limelightConfig) {
+                            Matrix<N3, N1> visionMeasurementStdDevs, List<CameraConfig> cameraConfigs, List<LimelightConfig> limelightConfigs) {
         super(swerveMods, gyro);
         this.kinematics = kinematics;
 
@@ -47,17 +47,19 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
 
         setPrevPose(this.odom.getEstimatedPosition());
 
-        this.cameras = new ArrayList<Camera>();
+        this.cameras = new ArrayList<>();
         for (CameraConfig cameraConfig : cameraConfigs) {
-            cameras.add(new Camera(cameraConfig));
+            this.cameras.add(new Camera(cameraConfig));
         }
-
-        limelight = new Limelight(limelightConfig);
+        this.limelights = new ArrayList<>();
+        for (LimelightConfig limelightConfig : limelightConfigs) {
+            this.limelights.add(new Limelight(limelightConfig));
+        }
     }
 
-    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs, LimelightConfig limelightConfig) {
+    public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs, List<LimelightConfig> limelightConfigs) {
         this(swerveMods, gyro, kinematics, VecBuilder.fill(0.1, 0.1, 0.05),
-                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs, limelightConfig);
+                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs, limelightConfigs);
     }
 
     public void updateVisionPoses() {
@@ -75,16 +77,25 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
      * The input should be relative to the robot, aka a Transform2d input with x = +1, y = -1, rot = pi 
      * should move the robot 1 unit forward, 1 unit left, perform a 180 degree rotation
      * @param driverInput a Transform2d of the driver-desired movement of the robot, relative to the robot
+     * also remember that rotation is in radians and x and y should be in meters
      * @return an adjusted vector that will nudge the robot closer to the detected object
      */
     public Transform2d addVisionMovementAdjustment(Transform2d driverInput) {
-        Optional<DetectedObject> detection = limelight.getLastestDetection();
-        if (detection.isPresent()) {
+        DetectedObject bestDetection = null;
+        double bestArea = -1;
+        for (Limelight limelight : limelights) {
+            Optional<DetectedObject> detection = limelight.getLastestDetection();
+            if (detection.isPresent() && detection.get().area > bestArea) {
+                bestDetection = detection.get();
+                bestArea = bestDetection.area;
+            }
+        }
+        if (bestArea == -1) {
             return driverInput;
         }
-        Rotation2d newAngle = driverInput.getRotation().plus(Rotation2d.fromDegrees(detection.get().xAngleOffset / 10));  // max offset is 2.6 degrees
-        double newY = driverInput.getY() + (detection.get().xAngleOffset / (26*2));   // max offset is 0.5 meters
-        double newX = driverInput.getX() + (1 / detection.get().area);    // max offset is 1/minValidDetectionArea as described in LimelightConfig
+        Rotation2d newAngle = driverInput.getRotation().plus(Rotation2d.fromDegrees(bestDetection.xAngleOffset / 10));  // max offset is 2.6 degrees
+        double newY = driverInput.getY() + (bestDetection.xAngleOffset / (26*2));   // max offset is 0.5 meters
+        double newX = driverInput.getX() + (1 / bestDetection.area);    // max offset is 1/minValidDetectionArea as described in LimelightConfig
         return new Transform2d(newX, newY, newAngle);
     }
 
