@@ -1,7 +1,5 @@
 package POPLib.Swerve.SwerveModules;
 
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.spark.SparkMax;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
@@ -85,7 +83,7 @@ public class SwerveModuleNeo extends SwerveModule {
 
     @Override
     protected Voltage getDriveVoltage() {
-        // TOOD: Verify correctness
+        // TODO: Verify correctness
         return Units.Volts.of(driveMotor.getBusVoltage());
     }
 
