@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
@@ -150,25 +151,25 @@ public abstract class SwerveModule {
 
     public abstract void runSysIdRoutine(double voltage);
 
-    public LinearVelocity accelLimit(LinearVelocity newVelocity) {
-        LinearVelocity velocityChange = newVelocity.minus(lastVelo);
-        Time ellapsedTime = Units.Seconds.of(Timer.getFPGATimestamp()).minus(lastVeloTime);
+     public LinearVelocity accelLimit(LinearVelocity newVelo) {
+        LinearVelocity veloChange = newVelo.minus(lastVelo);
+        Time elapsedTime = Units.Seconds.of(Timer.getFPGATimestamp()).minus(lastVeloTime);
 
-        // TODO: Update
-        // newVelocity = lastVelo.plus( 
-        //     (
-        //         Math.max(
-        //             velocityChange.div(ellapsedTime).abs(Units.MetersPerSecondPerSecond), 
-        //             swerveModuleConstants.moduleInfo.maxAcceleration.times(
-        //                 1 - lastVelo.div(swerveModuleConstants.moduleInfo.maxSpeed).magnitude()
-        //             ).in(Units.MetersPerSecondPerSecond)
-        //         ) 
-        //         * ellapsedTime.in(Units.Seconds) * (velocityChange.lt(Units.MetersPerSecond.of(0)) ? -1 : 1)));
+        LinearAcceleration maxAcceleration = swerveModuleConstants.moduleInfo.maxAcceleration.times(
+            1 - lastVelo.divide(swerveModuleConstants.moduleInfo.maxSpeed).magnitude()
+        );
 
-        lastVelo = newVelocity;
-        lastVeloTime.plus(ellapsedTime);
+        if (veloChange.divide(elapsedTime).gt(maxAcceleration)) {
+            newVelo = lastVelo.plus(
+                maxAcceleration.times(elapsedTime)
+                .times(veloChange.lt(Units.MetersPerSecond.of(0)) ? -1 : 1)                    
+            );
+        }
 
-        return newVelocity;
+        lastVelo = newVelo;
+        lastVeloTime = lastVeloTime.plus(elapsedTime);
+
+        return newVelo;
     }
 
     public void updateInputs(ModuleIOInputsAutoLogged inputs) {
