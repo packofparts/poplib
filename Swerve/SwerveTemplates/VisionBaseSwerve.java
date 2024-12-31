@@ -90,7 +90,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
                 bestArea = bestDetection.area;
             }
         }
-        if (bestArea == -1) {
+        if (bestArea == -1 || bestDetection == null) {
             return driverInput;
         }
         Rotation2d newAngle = driverInput.getRotation().plus(Rotation2d.fromDegrees(bestDetection.xAngleOffset / 10));  // max offset is 2.6 degrees
