@@ -28,6 +28,11 @@ public class XboxOI extends OI {
         public static final int OPERATOR_PORT = 1;
     }
 
+    public XboxOI() {
+        driverController = new CommandXboxController(OIConstants.DRIVE_PORT);
+        operatorController = new CommandXboxController(OIConstants.OPERATOR_PORT);
+    }
+
     @Override
     public double getDriveTrainRotation() {
         return getRawAxis(OIConstants.DRIVE_ROTATE, driverController);

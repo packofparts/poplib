@@ -36,7 +36,7 @@ public class SwerveModuleConstants {
     public static IdleMode driveIdleMode = IdleMode.kBrake;
 
     public final static Distance wheelCircumference = Units.Inches.of(4).times(Math.PI);
-    public final Distance driveDistancePerRotation;
+    public final Distance driveDistancePerMotorRotation;
 
     public final boolean swerveTuningMode;
 
@@ -59,12 +59,12 @@ public class SwerveModuleConstants {
 
         this.moduleInfo = moduleInfo;
 
-        driveDistancePerRotation = wheelCircumference.times(moduleInfo.driveGearRatio);
+        driveDistancePerMotorRotation = wheelCircumference.times(moduleInfo.driveGearRatio);
 
         this.swerveTuningMode = swerveTuningMode;
 
         this.driveConfig = driveConfig;
-        this.driveConfig.conversion = new ConversionConfig(driveDistancePerRotation.in(Units.Meters), Units.Rotations);
+        this.driveConfig.conversion = new ConversionConfig(moduleInfo.driveGearRatio, Units.Rotations);
 
         this.angleConfig = angleConfig;
         angleConfig.conversion = new ConversionConfig(moduleInfo.angleGearRatio, Units.Rotations);

@@ -49,7 +49,7 @@ public class SparkPivot extends Pivot {
             setpoint.get(), 
             ControlType.kPosition,
             0,
-            ff.calculate(Units.Degrees.of(leadMotor.getEncoder().getPosition()), Units.DegreesPerSecond.of(0)).in(Units.Volt)
+            ff.calculate(leadMotor.getEncoder().getPosition(), 0)
         );
     }
 
