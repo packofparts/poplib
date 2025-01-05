@@ -1,3 +1,3 @@
 # POPLib 
 
-Add a proper README about the contents, purpose, and usage of this repo
+Shared library for Pack of Parts robot coding.
