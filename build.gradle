@@ -1,6 +1,7 @@
 plugins {
   id "org.sonarqube" version "6.0.1.5171"
-  id 'maven-publish'
+  id("maven-publish")
+  id("java")
 }
 
 sonar {
@@ -12,6 +13,12 @@ sonar {
 }
 
 publishing {
+  publications {
+    gpr(MavenPublication) {
+      from(components.java)
+    }
+  }
+
   repositories {
     maven {
       name = "GitHubPackages"
