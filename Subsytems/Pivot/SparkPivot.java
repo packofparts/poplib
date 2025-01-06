@@ -7,7 +7,6 @@ import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
 import POPLib.SmartDashboard.PIDTuning;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SparkPivot extends Pivot {

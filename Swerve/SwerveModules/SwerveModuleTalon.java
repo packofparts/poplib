@@ -1,5 +1,6 @@
 package POPLib.Swerve.SwerveModules;
 
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -22,6 +23,7 @@ public class SwerveModuleTalon extends SwerveModule {
     private VelocityDutyCycle drivePID;
     private VoltageOut driveVoltage;
     private PositionDutyCycle anglePID;
+    private CoastOut coastOut;
 
     public SwerveModuleTalon(SwerveModuleConstants moduleConstants) {
         super(moduleConstants);
@@ -35,7 +37,8 @@ public class SwerveModuleTalon extends SwerveModule {
 
         drivePID = new VelocityDutyCycle(0); 
         driveVoltage = new VoltageOut(0.0);
-        anglePID = new PositionDutyCycle(0); 
+        anglePID = new PositionDutyCycle(lastAngle.getRotations()); 
+        coastOut = new CoastOut();
     }
 
     @Override
