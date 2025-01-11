@@ -7,7 +7,6 @@ import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
 import POPLib.SmartDashboard.PIDTuning;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SparkPivot extends Pivot {
@@ -49,7 +48,7 @@ public class SparkPivot extends Pivot {
             setpoint.get(), 
             ControlType.kPosition,
             0,
-            ff.calculate(Units.Degrees.of(leadMotor.getEncoder().getPosition()), Units.DegreesPerSecond.of(0)).in(Units.Volt)
+            ff.calculate(leadMotor.getEncoder().getPosition(), 0)
         );
     }
 

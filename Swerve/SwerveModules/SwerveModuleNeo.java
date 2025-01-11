@@ -6,8 +6,7 @@ import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
 public class SwerveModuleNeo extends SwerveModule {
@@ -39,16 +38,6 @@ public class SwerveModuleNeo extends SwerveModule {
     }
 
     @Override
-    protected Distance getPosition() {
-        return Units.Meters.of(driveMotor.getEncoder().getPosition());
-    }
-
-    @Override
-    protected LinearVelocity getVelocity() {
-        return Units.MetersPerSecond.of(driveMotor.getEncoder().getVelocity());
-    }
-
-    @Override
     public void updatePID(PIDTuning angle, PIDTuning drive) {
         angle.updatePID(angleMotor);
         drive.updatePID(driveMotor);
@@ -64,5 +53,15 @@ public class SwerveModuleNeo extends SwerveModule {
     protected Voltage getDriveVoltage() {
         // TOOD: Verify correctness
         return Units.Volts.of(driveMotor.getBusVoltage());
+    }
+
+    @Override
+    protected Angle getDriveAngle() {
+        return Units.Rotations.of(driveMotor.getEncoder().getPosition());
+    }
+
+    @Override
+    protected AngularVelocity getDriveAngularVelocity() {
+        return Units.RotationsPerSecond.of(driveMotor.getEncoder().getVelocity());
     }
 }

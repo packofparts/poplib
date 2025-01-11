@@ -26,6 +26,7 @@ public class ConversionConfig {
 
      public void updateConfig(TalonFXConfiguration config) {
           // TODO: VERIFY THIS WORKS
+          System.out.println(unit.convertFrom(1.0, Units.Rotation));
           config.Feedback.SensorToMechanismRatio =  1.0 / (unit.convertFrom(1.0, Units.Rotation) / gearRatio);
      }
 }

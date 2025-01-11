@@ -9,18 +9,12 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.DimensionlessUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.LinearAccelerationUnit;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,13 +44,30 @@ public abstract class SwerveModule {
     abstract protected void applySwerveModuleState(double velocityMPS, Rotation2d angleRadians);
 
     abstract protected Angle getAngle();
-    abstract protected Distance getPosition();
-    abstract protected LinearVelocity getVelocity();
+
+    abstract protected Angle getDriveAngle();
+
+    protected Distance getDrivePosition() {
+        return Units.Meters.of(
+            getDriveAngle().in(Units.Rotations) * SwerveModuleConstants.wheelCircumference.in(Units.Meters)
+        );
+    }
+
+    protected LinearVelocity getVelocity() {
+        return Units.MetersPerSecond.of(
+            getDriveAngularVelocity().in(Units.RotationsPerSecond) * 
+            SwerveModuleConstants.wheelCircumference.in(Units.Meters)
+        );
+    }
+
+    abstract protected AngularVelocity getDriveAngularVelocity();
+
+
     abstract protected Voltage getDriveVoltage();
 
     public void logSysId(SysIdRoutineLog log) {
         log.motor("Drive " + swerveModuleConstants.moduleNumber)
-            .linearPosition(getPosition())
+            .linearPosition(getDrivePosition())
             .linearVelocity(getVelocity())
             .voltage(getDriveVoltage());
     }
@@ -66,7 +77,7 @@ public abstract class SwerveModule {
     }
 
     public Angle getPositionAngle() {
-        return Units.Rotations.of(getPosition().div(SwerveModuleConstants.wheelCircumference).magnitude());
+        return Units.Rotations.of(getDrivePosition().div(SwerveModuleConstants.wheelCircumference).magnitude());
     }
 
     public void log() {
@@ -98,7 +109,7 @@ public abstract class SwerveModule {
     }
 
     public SwerveModulePosition getPose() {
-        return new SwerveModulePosition(getPosition(), getRotation2dAngle());
+        return new SwerveModulePosition(getDrivePosition(), getRotation2dAngle());
     }
 
     public void setDesiredState(SwerveModuleState state) {

@@ -1,5 +1,6 @@
 package POPLib.Swerve.SwerveModules;
 
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -8,10 +9,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.Swerve.SwerveConstants.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
@@ -24,6 +23,7 @@ public class SwerveModuleTalon extends SwerveModule {
     private VelocityDutyCycle drivePID;
     private VoltageOut driveVoltage;
     private PositionDutyCycle anglePID;
+    private CoastOut coastOut;
 
     public SwerveModuleTalon(SwerveModuleConstants moduleConstants) {
         super(moduleConstants);
@@ -37,7 +37,8 @@ public class SwerveModuleTalon extends SwerveModule {
 
         drivePID = new VelocityDutyCycle(0); 
         driveVoltage = new VoltageOut(0.0);
-        anglePID = new PositionDutyCycle(0); 
+        anglePID = new PositionDutyCycle(lastAngle.getRotations()); 
+        coastOut = new CoastOut();
     }
 
     @Override
@@ -58,13 +59,13 @@ public class SwerveModuleTalon extends SwerveModule {
     }
 
     @Override
-    protected Distance getPosition() {
-        return Units.Meter.of(driveMotor.getPosition().getValueAsDouble());
+    protected Angle getDriveAngle() {
+        return driveMotor.getPosition().getValue();
     }
 
     @Override
-    protected LinearVelocity getVelocity() {
-        return Units.MetersPerSecond.of(driveMotor.getVelocity().getValueAsDouble());
+    protected AngularVelocity getDriveAngularVelocity() {
+        return driveMotor.getVelocity().getValue();
     }
 
     @Override
