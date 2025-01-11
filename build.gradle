@@ -1,0 +1,25 @@
+plugins {
+  id "org.sonarqube" version "6.0.1.5171"
+  id 'maven-publish'
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "packofparts_packofpartslib"
+    property "sonar.organization", "packofparts"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
+}
+
+publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url = "https://maven.pkg.github.com/octocat/hello-world"
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
+}
