@@ -1,6 +1,7 @@
 package POPLib.Subsytems.Pivot;
 
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkMax;
 import POPLib.Control.ArmFFConfig;
 import POPLib.Motor.FollowerConfig;
@@ -47,7 +48,7 @@ public class SparkPivot extends Pivot {
         leadMotor.getClosedLoopController().setReference(
             setpoint.get(), 
             ControlType.kPosition,
-            0,
+            ClosedLoopSlot.kSlot0,
             ff.calculate(leadMotor.getEncoder().getPosition(), 0)
         );
     }
