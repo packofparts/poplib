@@ -5,17 +5,38 @@ import POPLib.Control.PIDConfig;
 import POPLib.SmartDashboard.PIDTuning;
 import POPLib.SmartDashboard.TunableNumber;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Elevator extends SubsystemBase{
-    TunableNumber setpoint;
-    PIDTuning tuning;
-    ElevatorFeedforward feedforward;
+public abstract class Elevator extends SubsystemBase{
+    protected final TunableNumber setpoint;
+    protected PIDTuning tuning;
+    protected ElevatorFeedforward feedforward;
+    protected DigitalInput limitSwitch;
 
-    public Elevator(FFConfig FFconfig, boolean tuningMode, String subsytemName) {
+    public Elevator(FFConfig ffConfig, boolean tuningMode, String subsytemName) {
         super(subsytemName);
 
         setpoint = new TunableNumber("Elevator Setpoint", 0, tuningMode);
         tuning = new PIDTuning("Elevator", PIDConfig.getZeroPid(), tuningMode);
+        feedforward = ffConfig.getElevatorFeedforward();
     }
+    
+    public void updateSetpoint(double setPoint) {
+        setpoint.setDefault(setPoint);
+    }
+
+    public abstract double getError(double setpoint);
+
+    public Command moveElevator(double setpoint, double error) {
+        return run(() -> updateSetpoint(setpoint)).
+        until(() -> getError(setpoint) < error);
+    }
+
+    public abstract Command moveUp(double speed);
+
+    public abstract Command moveDown(double speed);
+
+    public abstract Command stop();
 }
