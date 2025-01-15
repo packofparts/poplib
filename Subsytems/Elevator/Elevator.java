@@ -29,6 +29,7 @@ public abstract class Elevator extends SubsystemBase{
 
     public abstract double getError(double setpoint);
 
+    // this is from the frc2025 repo, plz check that it works
     public Command moveElevator(double setpoint, double error) {
         return run(() -> updateSetpoint(setpoint)).
         until(() -> getError(setpoint) < error);
