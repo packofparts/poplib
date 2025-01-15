@@ -3,7 +3,7 @@ package POPLib.Subsytems.Pivot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkMax;
-import POPLib.Control.ArmFFConfig;
+import POPLib.Control.FFConfig;
 import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
 import POPLib.Sensors.AbsoluteEncoder.AbsoluteEncoderConfig;
@@ -16,7 +16,7 @@ public class SparkPivot extends Pivot {
     private final SparkMax followerMotor;
     private final PIDTuning pid;
 
-    public SparkPivot(MotorConfig leadConfig, FollowerConfig followerConfig, double gearRatio, ArmFFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
+    public SparkPivot(MotorConfig leadConfig, FollowerConfig followerConfig, double gearRatio, FFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
         super(ffConfig, absoluteConfig, tuningMode, subsytemName);
         leadMotor = leadConfig.createSparkMax();
         followerMotor = followerConfig.createSparkMax();
