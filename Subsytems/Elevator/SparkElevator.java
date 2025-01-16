@@ -31,7 +31,7 @@ public class SparkElevator extends Elevator {
     public void periodic() {
         super.tuning.updatePID(leadMotor);
         leadMotor.getClosedLoopController().setReference(
-            getEncoderPos(), 
+            super.setpoint.get(), 
             ControlType.kPosition, 
             ClosedLoopSlot.kSlot1, 
             super.feedforward.calculate(getEncoderPos(), 0.0));

@@ -22,7 +22,7 @@ public abstract class Elevator extends SubsystemBase{
         tuning = new PIDTuning("Elevator", PIDConfig.getZeroPid(), tuningMode);
         feedforward = ffConfig.getElevatorFeedforward();
     }
-    
+
     public void updateSetpoint(double setPoint) {
         setpoint.setDefault(setPoint);
     }
