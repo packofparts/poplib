@@ -28,6 +28,10 @@ public class MathUtil {
     public static double getError(SparkMax target, double setpoint) {
         return getError(target.getEncoder().getPosition(), setpoint);
     }
+    
+    public static double getError(TalonFX target, double setpoint) {
+        return getError(target.getPosition().getValueAsDouble(), setpoint);
+    }
 
     public static double getError(SparkMax target, TunableNumber setpoint) {
         return getError(target.getEncoder().getPosition(), setpoint.get());

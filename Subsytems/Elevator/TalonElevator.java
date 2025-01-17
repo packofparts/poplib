@@ -4,6 +4,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import POPLib.Control.FFConfig;
+import POPLib.Math.MathUtil;
 import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
 import edu.wpi.first.units.AngleUnit;
@@ -34,13 +35,33 @@ public class TalonElevator extends Elevator {
         if (usePID) {
             leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
         }
-        SmartDashboard.putNumber("Elevator lead motor pos", leadMotor.getPosition().getValue().in(Units.Radians));
+        SmartDashboard.putNumber("Elevator lead motor pos", leadMotor.getPosition().getValueAsDouble());
         if (followMotor != null) {
-            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValue().in(Units.Radians));
+            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValueAsDouble());
         }
     }
 
-    
+    public double getError(double setpoint) {
+        return MathUtil.getError(, null);
+    }
+
+    public Command moveUp(double speed) {
+        return runOnce(() -> {
+            leadMotor.set(Math.abs(speed));
+        });
+    }
+
+    public Command moveDown(double speed) {
+        return runOnce(() -> {
+            leadMotor.set(-Math.abs(speed));
+        });
+    }
+
+    public Command stop() {
+        return runOnce(() -> {
+            leadMotor.set(0.0);
+        });
+    }
 
     
     
