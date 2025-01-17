@@ -23,6 +23,8 @@ public abstract class Elevator extends SubsystemBase{
         feedforward = ffConfig.getElevatorFeedforward();
     }
 
+    public abstract void periodic();
+
     public abstract double getError(double setpoint);
 
     // this is from the frc2025 repo, plz check that it works
