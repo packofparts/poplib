@@ -12,22 +12,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class SparkElevator extends Elevator {
     SparkMax leadMotor;
-    SparkMax followMotor = null;
+    SparkMax followMotor;
 
-    public SparkElevator(MotorConfig motorConfig, FFConfig ffConfig, boolean tuningMode, String subsystemName) {
+    public SparkElevator(MotorConfig motorConfig, FollowerConfig followerConfig, FFConfig ffConfig, boolean tuningMode, String subsystemName) {
         super(ffConfig, tuningMode, subsystemName);
 
         leadMotor = motorConfig.createSparkMax();
         leadMotor.getEncoder().setPosition(0.0);
-    }
-
-    public SparkElevator(MotorConfig motorConfig, FollowerConfig followerConfig, FFConfig ffConfig, boolean tuningMode, String subsystemName) {
-        this(motorConfig, ffConfig, tuningMode, subsystemName);
-
         followMotor = followerConfig.createSparkMax();
         followMotor.getEncoder().setPosition(0.0);
     }
 
+    @Override
     public void periodic() {
         super.tuning.updatePID(leadMotor);
         leadMotor.getClosedLoopController().setReference(

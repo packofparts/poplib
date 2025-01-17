@@ -23,16 +23,12 @@ public abstract class Elevator extends SubsystemBase{
         feedforward = ffConfig.getElevatorFeedforward();
     }
 
-    public void updateSetpoint(double setPoint) {
-        setpoint.setDefault(setPoint);
-    }
-
     public abstract double getError(double setpoint);
 
     // this is from the frc2025 repo, plz check that it works
-    public Command moveElevator(double setpoint, double error) {
-        return run(() -> updateSetpoint(setpoint)).
-        until(() -> getError(setpoint) < error);
+    public Command moveElevator(double setPoint, double error) {
+        return run(() -> setpoint.setDefault(setPoint)).
+        until(() -> getError(setPoint) < error);
     }
 
     public abstract Command moveUp(double speed);
