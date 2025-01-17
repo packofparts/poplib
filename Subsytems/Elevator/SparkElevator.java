@@ -49,18 +49,27 @@ public class SparkElevator extends Elevator {
         return MathUtil.getError(leadMotor, setpoint);
     }
 
+    /**
+     * Requires usePID to be false in order to work
+     */
     public Command moveUp(double speed) {
         return runOnce(() -> {
             leadMotor.set(Math.abs(speed));
         });
     }
 
+    /**
+     * Requires usePID to be false in order to work
+     */
     public Command moveDown(double speed) {
         return runOnce(() -> {
             leadMotor.set(-Math.abs(speed));
         });
     }
 
+    /**
+     * Requires usePID to be false in order to work
+     */
     public Command stop() {
         return runOnce(() -> {
             leadMotor.set(0.0);
