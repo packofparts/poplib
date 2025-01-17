@@ -27,6 +27,8 @@ public abstract class Elevator extends SubsystemBase{
 
     public abstract double getError(double setpoint);
 
+    public abstract double getEncoderPos();
+
     // this is from the frc2025 repo, plz check that it works
     public Command moveElevator(double setPoint, double error) {
         return run(() -> setpoint.setDefault(setPoint)).

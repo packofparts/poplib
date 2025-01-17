@@ -6,6 +6,8 @@ import POPLib.Control.FFConfig;
 import POPLib.Math.MathUtil;
 import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -35,10 +37,14 @@ public class TalonElevator extends Elevator {
             super.tuning.updatePID(leadMotor);
             leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
         }
-        SmartDashboard.putNumber("Elevator lead motor pos", leadMotor.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Elevator lead motor pos", getEncoderPos());
         if (followMotor != null) {
-            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValueAsDouble());
+            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValue().in(Units.Rotations));
         }
+    }
+
+    public double getEncoderPos() {
+        return leadMotor.getPosition().getValue().in(Units.Rotations);
     }
 
     public double getError(double setpoint) {
