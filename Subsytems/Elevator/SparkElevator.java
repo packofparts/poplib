@@ -27,8 +27,8 @@ public class SparkElevator extends Elevator {
 
     @Override
     public void periodic() {
-        super.tuning.updatePID(leadMotor);
         if (usePID) {
+            super.tuning.updatePID(leadMotor);
             leadMotor.getClosedLoopController().setReference(
                 super.setpoint.get(), 
                 ControlType.kPosition, 

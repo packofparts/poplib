@@ -1,15 +1,13 @@
 package POPLib.Subsytems.Elevator;
 
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import POPLib.Control.FFConfig;
 import POPLib.Math.MathUtil;
 import POPLib.Motor.FollowerConfig;
 import POPLib.Motor.MotorConfig;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class TalonElevator extends Elevator {
     TalonFX leadMotor;
@@ -21,9 +19,11 @@ public class TalonElevator extends Elevator {
         super(ffConfig, tuningMode, subsystemName);
     
         this.usePID = usePID;
+
         leadMotor = motorConfig.createTalon();
         position = new PositionDutyCycle(0.0).
         withSlot(leadMotor.getClosedLoopSlot().getValue());
+
         leadMotor.setPosition(0.0);
         followMotor = followerConfig.createTalon();
         followMotor.setPosition(0.0);
@@ -31,8 +31,8 @@ public class TalonElevator extends Elevator {
 
     @Override
     public void periodic() {
-        super.tuning.updatePID(leadMotor);
         if (usePID) {
+            super.tuning.updatePID(leadMotor);
             leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
         }
         SmartDashboard.putNumber("Elevator lead motor pos", leadMotor.getPosition().getValueAsDouble());
@@ -42,7 +42,7 @@ public class TalonElevator extends Elevator {
     }
 
     public double getError(double setpoint) {
-        return MathUtil.getError(, null);
+        return MathUtil.getError(leadMotor, setpoint);
     }
 
     public Command moveUp(double speed) {
@@ -61,8 +61,5 @@ public class TalonElevator extends Elevator {
         return runOnce(() -> {
             leadMotor.set(0.0);
         });
-    }
-
-    
-    
+    }    
 }
