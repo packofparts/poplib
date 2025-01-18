@@ -3,7 +3,7 @@ package poplib.subsytems.pivot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkMax;
-import poplib.control.ArmFFConfig;
+import poplib.control.FFConfig;
 import poplib.motor.FollowerConfig;
 import poplib.motor.MotorConfig;
 import poplib.sensors.absolute_encoder.AbsoluteEncoderConfig;
