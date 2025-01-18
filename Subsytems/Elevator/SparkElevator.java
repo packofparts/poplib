@@ -36,9 +36,7 @@ public class SparkElevator extends Elevator {
                 super.feedforward.calculate(getEncoderPos(), 0.0));
         }
         SmartDashboard.putNumber("Elevator lead motor pos", getEncoderPos());
-        if (followMotor != null) {
-            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getEncoder().getPosition());
-        }
+        SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getEncoder().getPosition());
     }
 
     public double getEncoderPos() {

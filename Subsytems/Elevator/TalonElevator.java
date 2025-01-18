@@ -38,9 +38,7 @@ public class TalonElevator extends Elevator {
             leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
         }
         SmartDashboard.putNumber("Elevator lead motor pos", getEncoderPos());
-        if (followMotor != null) {
-            SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValue().in(Units.Rotations));
-        }
+        SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValue().in(Units.Rotations));
     }
 
     public double getEncoderPos() {
