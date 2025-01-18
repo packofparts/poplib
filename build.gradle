@@ -31,8 +31,8 @@ sonar {
 publishing {
   publications {
     gpr(MavenPublication) {
-      groupId = 'org.packofparts.poplib'
-      artifactId = 'library'
+      groupId = 'org.packofparts'
+      artifactId = 'poplib'
       version = '1.0'
       from(components.java)
     }
