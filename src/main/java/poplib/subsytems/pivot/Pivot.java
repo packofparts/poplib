@@ -1,6 +1,6 @@
 package poplib.subsytems.pivot;
 
-import poplib.control.ArmFFConfig;
+import poplib.control.FFConfig;
 import poplib.sensors.absolute_encoder.AbsoluteEncoder;
 import poplib.sensors.absolute_encoder.AbsoluteEncoderConfig;
 import poplib.smart_dashboard.TunableNumber;
@@ -14,7 +14,7 @@ public abstract class Pivot extends SubsystemBase {
     protected final ArmFeedforward ff;
     protected final TunableNumber setpoint;
 
-    public Pivot(ArmFFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
+    public Pivot(FFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
         super(subsytemName);
 
         absoluteEncoder = absoluteConfig.getDutyCycleEncoder();

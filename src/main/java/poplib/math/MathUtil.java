@@ -33,6 +33,10 @@ public class MathUtil {
         return getError(target.getEncoder().getPosition(), setpoint.get());
     }
 
+    public static double getError(TalonFX target, double setpoint) {
+        return getError(target.getPosition().getValueAsDouble(), setpoint);
+    }
+
     public static double getError(TalonFX target, TunableNumber setpoint) {
         return getError(target.getPosition().getValueAsDouble(), setpoint.get());
     }
