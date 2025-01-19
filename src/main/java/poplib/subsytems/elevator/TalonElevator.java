@@ -39,8 +39,7 @@ public class TalonElevator extends Elevator {
 
     public void updatePID() {
         if (usePID) {
-            leadMotor.setControl(position.withPosition(super.setpoint.get()).
-            withFeedForward(super.feedforward.getKg()));
+            leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
         }
     }
 
