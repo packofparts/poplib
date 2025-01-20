@@ -1,8 +1,8 @@
 name: Package Publishing
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ "main" ]
 
 jobs:
   publish:
@@ -23,7 +23,39 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Publishing
-      run: ./gradlew publish
+    - name: Increment Git Tag
+      run: |
+        # Fetch all tags to ensure the latest ones are available
+        git fetch --tags
+
+        # Find the latest tag that starts with "v"
+        LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+
+        # Fallback if no tags exist
+        if [ -z "$LATEST_TAG" ]; then
+          LATEST_TAG="v1.0.0"
+        fi
+
+        # Extract the version numbers
+        VERSION=${LATEST_TAG#v}
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+        # Increment the patch version
+        PATCH=$((PATCH + 1))
+        NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+
+        # Create and push the new tag
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git tag "$NEW_TAG"
+        git push origin "$NEW_TAG"
+
+        echo "Created new tag: $NEW_TAG"
+
+    - name: Building and Publishing
+      run: |
+        ./gradlew clean build
+        ./gradlew publish
+
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
