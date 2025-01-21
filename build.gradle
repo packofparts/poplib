@@ -6,6 +6,20 @@ plugins {
     id "maven-publish"
 }
 
+import java.util.regex.Matcher
+
+def getVersionFromGitTag() {
+    def tags = providers.exec {
+      commandLine("git", "tag", "--list", "v*", "--sort=-v:refname")
+    }.standardOutput.asText.get()
+
+    // get the first tag (latest version) and strip the leading 'v' character
+    return tags.split("\n")[0].substring(1) 
+}
+
+project.version = getVersionFromGitTag()
+println "Project version set to ${project.version}"
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
@@ -33,7 +47,6 @@ publishing {
     gpr(MavenPublication) {
       groupId = 'org.packofparts'
       artifactId = 'poplib'
-      version = '1.0'
       from(components.java)
     }
   }
