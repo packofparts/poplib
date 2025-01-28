@@ -38,7 +38,7 @@ public class PIDTuning {
             config.closedLoop.pidf(kP.get(),kI.get(), kD.get(), kF.get());
             
             ErrorHandling.handlRevLibError(
-                motor.configure(config,  ResetMode.kNoResetSafeParameters, PersistMode.kNoResetSafeParameters),
+                motor.configure(config,  ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters),
                 "updating PID for motor id " + motor.getDeviceId()
             );
         }
