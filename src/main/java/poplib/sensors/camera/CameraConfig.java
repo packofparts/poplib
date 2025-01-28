@@ -21,8 +21,3 @@ public class CameraConfig {
         this.aprilTagField = thisYearsField;
     }
 }
-
-enum StdDevStategy {
-    DISTANCE,    // recommended strategy
-    AMBIGUITY
-}
