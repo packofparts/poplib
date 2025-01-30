@@ -46,22 +46,25 @@ public class Camera {
                 PhotonTrackedTarget target = result.getBestTarget();
 
                 Rotation2d targetYaw = Rotation2d.fromRadians(target.getYaw());
+                Optional<Pose3d> targetPose = layout.getTagPose(target.fiducialId);
 
-                double distanceToTarget = PhotonUtils.calculateDistanceToTargetMeters(
-                    config.cameraToRobot.getZ(),
-                    layout.getTagPose(target.fiducialId).get().getZ(),
-                    config.cameraToRobot.getRotation().getY(),
-                    target.pitch
-                );
+                if (targetPose.isPresent()) {
+                    double distanceToTarget = PhotonUtils.calculateDistanceToTargetMeters(
+                        config.cameraToRobot.getZ(),
+                        targetPose.get().getZ(),
+                        config.cameraToRobot.getRotation().getY(),
+                        target.pitch
+                    );
 
-                Translation2d translation = PhotonUtils.estimateCameraToTargetTranslation(
-                    distanceToTarget,
-                    targetYaw
-                );
+                    Translation2d translation = PhotonUtils.estimateCameraToTargetTranslation(
+                        distanceToTarget,
+                        targetYaw
+                    );
 
 
 
-                ret = Optional.of(new Pose2d(translation, targetYaw));
+                    ret = Optional.of(new Pose2d(translation, targetYaw));
+                }
             }
          }
 
