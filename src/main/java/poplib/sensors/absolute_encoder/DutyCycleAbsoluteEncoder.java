@@ -21,8 +21,4 @@ public class DutyCycleAbsoluteEncoder extends AbsoluteEncoder {
     public Rotation2d getPosition() {
         return Rotation2d.fromDegrees(getDegreePosition());
     }
-
-    public double getDegreeNormalizedPosition() {
-        return MathUtil.inputModulus(getDegreePosition(), -180, 180);
-    }
 }

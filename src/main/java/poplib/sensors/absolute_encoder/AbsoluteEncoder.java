@@ -1,5 +1,6 @@
 package poplib.sensors.absolute_encoder;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public abstract class AbsoluteEncoder {
@@ -10,4 +11,8 @@ public abstract class AbsoluteEncoder {
     }
 
     public abstract Rotation2d getPosition();
+
+    public double getDegreeNormalizedPosition() {
+        return MathUtil.inputModulus(getPosition().getDegrees(), -180, 180);
+    }
 }
