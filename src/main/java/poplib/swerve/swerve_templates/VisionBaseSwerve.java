@@ -72,6 +72,18 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
         }
     }
 
+    // TODO: Find a better way to do this
+    public Pose2d getFirstRelativeVisionPose() {
+        for (Camera camera : cameras) {
+            Optional<Pose2d> pose = camera.relativeDistanceFromCameraToAprilTag();
+            if (pose.isPresent()) {
+                return pose.get();
+            }
+        } 
+
+        return null;
+    }
+
     /**
      * Method that will return an adjusted vector to nudge the robot closer to a game piece.
      * The input should be relative to the robot, aka a Transform2d input with x = +1, y = -1, rot = pi 

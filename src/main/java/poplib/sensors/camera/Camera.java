@@ -7,6 +7,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -15,6 +16,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -25,14 +28,45 @@ public class Camera {
     private PhotonPoseEstimator poseEstimator;
     private final Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
     private Matrix<N3, N1> currStdDevs = null;
+    private AprilTagFieldLayout layout;
 
     public Camera(CameraConfig config) {
         this.config = config;
         camera = new PhotonCamera(config.cameraName);
-        AprilTagFieldLayout aprilTags = AprilTagFieldLayout.loadField(config.aprilTagField);
-        poseEstimator = new PhotonPoseEstimator(aprilTags, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, config.cameraToRobot);
+        layout = AprilTagFieldLayout.loadField(config.aprilTagField);
+        poseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, config.cameraToRobot);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     }
+
+    public Optional<Pose2d> relativeDistanceFromCameraToAprilTag() {
+        Optional<Pose2d> ret = Optional.empty();
+
+        for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
+            if (result.hasTargets()) {
+                PhotonTrackedTarget target = result.getBestTarget();
+
+                Rotation2d targetYaw = Rotation2d.fromRadians(target.getYaw());
+
+                double distanceToTarget = PhotonUtils.calculateDistanceToTargetMeters(
+                    config.cameraToRobot.getZ(),
+                    layout.getTagPose(target.fiducialId).get().getZ(),
+                    config.cameraToRobot.getRotation().getY(),
+                    target.pitch
+                );
+
+                Translation2d translation = PhotonUtils.estimateCameraToTargetTranslation(
+                    distanceToTarget,
+                    targetYaw
+                );
+
+
+
+                ret = Optional.of(new Pose2d(translation, targetYaw));
+            }
+         }
+
+        return ret;
+    } 
 
     public Optional<EstimatedRobotPose> getEstimatedPose(Pose2d currPose) {
         if (!camera.isConnected()) {
@@ -115,7 +149,7 @@ public class Camera {
             return false;
         }
         if (targets.size() == 1) {
-            return targets.get(0).getPoseAmbiguity() >= config.poseAmbiguityThreshold;
+            return targets.get(0).getPoseAmbiguity() < config.poseAmbiguityThreshold;
         }
         return true;
     }
