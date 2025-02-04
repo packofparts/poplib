@@ -3,16 +3,16 @@ package poplib.swerve.swerve_templates;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import frc.robot.util.Camera;
 import org.photonvision.EstimatedRobotPose;
 
-import poplib.sensors.camera.Camera;
 import poplib.sensors.camera.CameraConfig;
 import poplib.sensors.camera.DetectedObject;
 import poplib.sensors.camera.Limelight;
 import poplib.sensors.camera.LimelightConfig;
 import poplib.sensors.gyro.Gyro;
 import poplib.swerve.swerve_modules.SwerveModule;
+import poplib.swerve.swerve_templates.BaseSwerve;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -145,7 +145,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
-        updateVisionPoses();
+        // updateVisionPoses();
         odom.update(getGyro().getNormalizedRotation2dAngle(), getPose());
     }
 }

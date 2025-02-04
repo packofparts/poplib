@@ -2,6 +2,9 @@ package poplib.sensors.camera;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
+
+import javax.swing.text.html.HTML.Tag;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -12,15 +15,22 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import poplib.sensors.camera.CameraConfig;
+import poplib.sensors.camera.StdDevStategy;
+
+
 
 public class Camera {
     private final PhotonCamera camera;
@@ -44,28 +54,13 @@ public class Camera {
         for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
             if (result.hasTargets()) {
                 PhotonTrackedTarget target = result.getBestTarget();
-
-                Rotation2d targetYaw = Rotation2d.fromRadians(target.getYaw());
-                Optional<Pose3d> targetPose = layout.getTagPose(target.fiducialId);
-
-                if (targetPose.isPresent()) {
-                    double distanceToTarget = PhotonUtils.calculateDistanceToTargetMeters(
-                        config.cameraToRobot.getZ(),
-                        targetPose.get().getZ(),
-                        config.cameraToRobot.getRotation().getY(),
-                        target.pitch
-                    );
-
-                    Translation2d translation = PhotonUtils.estimateCameraToTargetTranslation(
-                        distanceToTarget,
-                        targetYaw
-                    );
-
-
-
-                    ret = Optional.of(new Pose2d(translation, targetYaw));
+                Optional<Pose3d> pose = layout.getTagPose(target.getFiducialId());
+                if (pose.isPresent()) {
+                ret = Optional.of(new Pose2d(
+                    new Translation2d(target.getBestCameraToTarget().getX(), target.getBestCameraToTarget().getY()), 
+                    Rotation2d.fromRadians(pose.get().getRotation().getZ())));
                 }
-            }
+           }
          }
 
         return ret;
