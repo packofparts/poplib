@@ -3,7 +3,6 @@ package poplib.swerve.swerve_templates;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import frc.robot.util.Camera;
 import org.photonvision.EstimatedRobotPose;
 
 import poplib.sensors.camera.CameraConfig;
@@ -13,6 +12,7 @@ import poplib.sensors.camera.LimelightConfig;
 import poplib.sensors.gyro.Gyro;
 import poplib.swerve.swerve_modules.SwerveModule;
 import poplib.swerve.swerve_templates.BaseSwerve;
+import poplib.sensors.camera.Camera;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
