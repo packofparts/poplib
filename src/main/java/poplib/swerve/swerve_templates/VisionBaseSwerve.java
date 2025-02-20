@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
-
 import poplib.sensors.camera.CameraConfig;
 import poplib.sensors.camera.DetectedObject;
 import poplib.sensors.camera.Limelight;
@@ -38,12 +37,12 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
         this.kinematics = kinematics;
 
         this.odom = new SwerveDrivePoseEstimator(
-                kinematics,
-                getGyro().getNormalizedRotation2dAngle(),
-                getPose(),
-                new Pose2d(0, 0, getGyro().getNormalizedRotation2dAngle()),
-                stateStdDevs,
-                visionMeasurementStdDevs);
+            kinematics,
+            getGyro().getNormalizedRotation2dAngle(),
+            getPose(),
+            new Pose2d(0, 0, getGyro().getNormalizedRotation2dAngle()),
+            stateStdDevs,
+            visionMeasurementStdDevs);
 
         setPrevPose(this.odom.getEstimatedPosition());
 
@@ -58,16 +57,15 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     }
 
     public VisionBaseSwerve(SwerveModule[] swerveMods, Gyro gyro, SwerveDriveKinematics kinematics, List<CameraConfig> cameraConfigs, List<LimelightConfig> limelightConfigs) {
-        this(swerveMods, gyro, kinematics, VecBuilder.fill(0.1, 0.1, 0.05),
-                VecBuilder.fill(0.9, 0.9, 0.9), cameraConfigs, limelightConfigs);
+        this(swerveMods, gyro, kinematics, VecBuilder.fill(0.7, 0.7, Units.degreesToRadians(17)),
+             VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.86)), cameraConfigs, limelightConfigs);
     }
 
     public void updateVisionPoses() {
         for (Camera camera : cameras) {
             Optional<EstimatedRobotPose> estPose = camera.getEstimatedPose(getOdomPose());
             if (estPose.isPresent()) {
-                odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), 
-                estPose.get().timestampSeconds, camera.getVisionStdDevs());
+                odom.addVisionMeasurement(estPose.get().estimatedPose.toPose2d(), estPose.get().timestampSeconds);
             }
         }
     }
@@ -80,11 +78,11 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
                 return pose.get();
             }
         } 
-
         return null;
     }
 
     /**
+     * TODO: TEST
      * Method that will return an adjusted vector to nudge the robot closer to a game piece.
      * The input should be relative to the robot, aka a Transform2d input with x = +1, y = -1, rot = pi 
      * should move the robot 1 unit forward, 1 unit left, perform a 180 degree rotation
@@ -113,10 +111,8 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
 
     @Override
     public void driveRobotOriented(Translation2d vector, double rot) {
-        // vector = accelrationLimit(vector);
-
         SwerveModuleState[] states = kinematics
-                .toSwerveModuleStates(new ChassisSpeeds(vector.getX(), vector.getY(), rot));
+            .toSwerveModuleStates(new ChassisSpeeds(vector.getX(), vector.getY(), rot));
 
         driveRobotOriented(states);
     }
@@ -145,7 +141,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
     @Override
     public void periodic() {
         super.periodic();
-        // updateVisionPoses();
+        updateVisionPoses();
         odom.update(getGyro().getNormalizedRotation2dAngle(), getPose());
     }
 }
