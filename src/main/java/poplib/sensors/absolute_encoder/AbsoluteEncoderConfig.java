@@ -2,6 +2,7 @@ package poplib.sensors.absolute_encoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
+import poplib.motor.ConversionConfig;
 
 public class AbsoluteEncoderConfig {
     public final int id;
