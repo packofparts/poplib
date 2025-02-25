@@ -14,7 +14,7 @@ public class DutyCycleAbsoluteEncoder extends AbsoluteEncoder {
     }
 
     public double getDegreePosition() {
-        return encoder.get() * 360 * (config.inversion ? -1 : 1) - config.offset.getDegrees();
+        return encoder.get() * 360 * config.conversionFactor.gearRatio * (config.inversion ? -1 : 1) - config.offset.getDegrees();
     }
 
     @Override
