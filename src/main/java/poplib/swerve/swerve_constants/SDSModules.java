@@ -7,11 +7,19 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 public enum SDSModules {
-    MK4i(
+    MK4iL3(
         (150.0 / 7.0), 
         6.12, 
         Units.MetersPerSecond.of(5.6), 
         Units.MetersPerSecondPerSecond.of(4), 
+        Units.RadiansPerSecond.of(4 * Math.PI), 
+        Units.RadiansPerSecondPerSecond.of(4)
+    ),
+    MK4iL2FOC(
+        (150.0 / 7.0), 
+        6.75, 
+        Units.MetersPerSecond.of(4.572), 
+        Units.MetersPerSecondPerSecond.of(9.8), 
         Units.RadiansPerSecond.of(4 * Math.PI), 
         Units.RadiansPerSecondPerSecond.of(4)
     ),
