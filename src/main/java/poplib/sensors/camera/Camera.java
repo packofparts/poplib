@@ -76,7 +76,7 @@ public class Camera {
         }
 
         for (var pose : poses) {
-            if (ret1.equals(Optional.empty()) || dist(ret1.get().getBestCameraToTarget()) > dist(pose.getBestCameraToTarget())) {
+            if (ret1.isEmpty() || dist(ret1.get().getBestCameraToTarget()) > dist(pose.getBestCameraToTarget())) {
                 ret1 = Optional.of(pose);
             }
         }
