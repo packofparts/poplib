@@ -1,5 +1,6 @@
 package poplib.sensors.camera;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
@@ -21,6 +22,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -49,22 +51,49 @@ public class Camera {
     }
 
     public Optional<Pose2d> relativeDistanceFromCameraToAprilTag() {
+        if (!camera.isConnected()) {
+            DriverStation.reportError("Camera named: " + config.cameraName + " is not connected!!!!!!!!", false);
+            // the above code should save to the log file that you can view in the DS Log Viewer
+            return Optional.empty();
+        }
+        ArrayList<PhotonTrackedTarget> poses = new ArrayList<>();
+        
+        Optional<PhotonTrackedTarget> ret1 = Optional.empty();
         Optional<Pose2d> ret = Optional.empty();
-
         for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
             if (result.hasTargets()) {
-                PhotonTrackedTarget target = result.getBestTarget();
-                Optional<Pose3d> pose = layout.getTagPose(target.getFiducialId());
-                if (pose.isPresent()) {
-                ret = Optional.of(new Pose2d(
-                    new Translation2d(target.getBestCameraToTarget().getX(), target.getBestCameraToTarget().getY()), 
-                    Rotation2d.fromRadians(pose.get().getRotation().getZ())));
+                List<PhotonTrackedTarget> target = result.getTargets();
+                for (var i : target) {
+                    poses.add(i);
                 }
-           }
-         }
+                // Optional<Pose3d> pose = layout.getTagPose(target.getFiducialId());
+                // if (pose.isPresent()) {
+                //     poses.add(new Pose2d(
+                //         new Translation2d(target.getBestCameraToTarget().getX(), target.getBestCameraToTarget().getY()), 
+                //         Rotation2d.fromRadians(pose.get().getRotation().getZ())));
+                // }
+            }
+        }
 
+        for (var pose : poses) {
+            if (ret1.isEmpty() || dist(ret1.get().getBestCameraToTarget()) > dist(pose.getBestCameraToTarget())) {
+                ret1 = Optional.of(pose);
+            }
+        }
+
+        if (ret1.isPresent()) {
+        Optional<Pose3d> pose = layout.getTagPose(ret1.get().getFiducialId());
+                if (pose.isPresent()) {
+                    ret = Optional.of(new Pose2d(
+                        new Translation2d(ret1.get().getBestCameraToTarget().getX(), ret1.get().getBestCameraToTarget().getY()), 
+                        Rotation2d.fromRadians(pose.get().getRotation().getZ())));
+                }}
         return ret;
     } 
+
+    private double dist(Transform3d pose) {
+        return Math.sqrt(Math.pow(pose.getX(), 2) + Math.pow(pose.getY(), 2));
+    }
 
     public Optional<EstimatedRobotPose> getEstimatedPose(Pose2d currPose) {
         if (!camera.isConnected()) {

@@ -6,42 +6,53 @@ import poplib.control.FFConfig;
 import poplib.math.MathUtil;
 import poplib.motor.FollowerConfig;
 import poplib.motor.MotorConfig;
+import poplib.smart_dashboard.TunableNumber;
+import poplib.subsytems.elevator.Elevator;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class TalonElevator extends Elevator {
-    TalonFX leadMotor;
-    TalonFX followMotor;
-    boolean usePID;
-    PositionDutyCycle position;
-
-    public TalonElevator(MotorConfig motorConfig, FollowerConfig followerConfig, FFConfig ffConfig, boolean tuningMode, boolean usePID, String subsystemName) {
-        super(ffConfig, tuningMode, subsystemName);
+    private final TalonFX leadMotor;
+    private final TalonFX followMotor;
+    private final PositionDutyCycle position;
+    private final TunableNumber kG;
+    protected boolean usePID;
+    private ElevatorFeedforward ff;
+    public TalonElevator(MotorConfig motorConfig, FollowerConfig followerConfig, FFConfig ffConfig, boolean tuningMode, String subsystemName) {
+        super(
+            ffConfig, 
+            tuningMode, 
+            subsystemName
+        );
     
-        this.usePID = usePID;
-
         leadMotor = motorConfig.createTalon();
+        leadMotor.setPosition(0.0);
+
+        followMotor = followerConfig.createTalon();
+        followMotor.setPosition(0.0);
+
         position = new PositionDutyCycle(0.0).
         withSlot(leadMotor.getClosedLoopSlot().getValue());
 
-        leadMotor.setPosition(0.0);
-        followMotor = followerConfig.createTalon();
-        followMotor.setPosition(0.0);
+        kG = new TunableNumber(subsystemName + " kG", ffConfig.G, tuningMode);
+        ff = ffConfig.getElevatorFeedforward();
+        usePID = true;
     }
 
     @Override
     public void periodic() {            
         super.tuning.updatePID(leadMotor);
+
+        if (usePID) {
+            leadMotor.setControl(position.withPosition(setpoint.get()));
+        }
+
         SmartDashboard.putNumber("Elevator lead motor pos", getEncoderPos());
         SmartDashboard.putNumber("Elevator follow motor pos", followMotor.getPosition().getValue().in(Units.Rotations));
     }
 
-    public void updatePID() {
-        if (usePID) {
-            leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.feedforward.getKg()));
-        }
-    }
 
     public double getEncoderPos() {
         return leadMotor.getPosition().getValue().in(Units.Rotations);
@@ -51,30 +62,31 @@ public class TalonElevator extends Elevator {
         return MathUtil.getError(leadMotor, setpoint);
     }
 
-    /**
-     * Requires usePID to be false in order to work
-     */
+
     public Command moveUp(double speed) {
         return runOnce(() -> {
+            usePID = false;
             leadMotor.set(Math.abs(speed));
         });
     }
 
-    /**
-     * Requires usePID to be false in order to work
-     */
+
     public Command moveDown(double speed) {
         return runOnce(() -> {
+            usePID = false;
             leadMotor.set(-Math.abs(speed));
         });
     }
     
-    /**
-     * Requires usePID to be false in order to work
-     */
     public Command stop() {
         return runOnce(() -> {
+            usePID = true;
             leadMotor.set(0.0);
         });
-    }    
+    }
+
+    public void zeroPosition() {
+        leadMotor.setPosition(0.0);
+        followMotor.setPosition(0.0);
+    }
 }
