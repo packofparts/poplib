@@ -1,0 +1,296 @@
+package poplibv2.motors;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.units.Units;
+import poplib.error_handling.ErrorHandling;
+import poplibv2.errors.IncorrectUseOfPIDException;
+
+
+public class Motor {
+
+    private SparkMax spark;
+    private TalonFX talon;
+    private int canID;
+    private MotorVendor motorType;
+    private SparkMaxConfig sparkConfig;     // needed to change idle mode
+    private boolean isConfiguredWithPID;
+    private PositionDutyCycle positionDutyCycle;
+    private VelocityDutyCycle velocityDutyCycle;
+
+    /**
+     * POPLIB INTERNAL FUNCTION.
+     * <p></p>
+     * Handles the creation and configuration of a SparkMax motor. Do not use this to create a motor in the robot code. 
+     * This should only be called by other POPLib file (mostly just MotorConfig.java). If you want to create a motor, create a  
+     * MotorConfig object and call the createMotor() function.
+     * @param config The SparkMax Config to apply to the newly created motor
+     * @param canID The location of the motor on the canBUS.
+     */
+    public Motor(SparkMaxConfig config, int canID, boolean isConfiguredWithPID) {
+        this.spark = new SparkMax(canID, MotorType.kBrushless);
+        this.canID = canID;
+        this.sparkConfig = config;
+        this.isConfiguredWithPID = isConfiguredWithPID;
+        ErrorHandling.handlRevLibError(
+            spark.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+            "configuring motor " + canID
+        );
+        this.talon = null;
+        this.motorType = MotorVendor.REV_ROBOTICS_SPARK_MAX;
+        this.positionDutyCycle = null;
+        this.velocityDutyCycle = null;
+    }
+
+    /**
+     * POPLIB INTERNAL FUNCTION.
+     * <p></p>
+     * Handles the creation and configuration of a TalonFX motor. Do not use this to create a motor in the robot code. 
+     * This should only be called by other POPLib file (mostly just MotorConfig.java). If you want to create a motor, create a  
+     * MotorConfig object and call the createMotor() function.
+     * @param config The SparkMax Config to apply to the newly created motor
+     * @param canID The location of the motor on the canBUS.
+     */
+    public Motor(TalonFXConfiguration config, int canID, String canBus, boolean isConfiguredWithPID) {
+        talon = new TalonFX(canID, canBus);
+        talon.getConfigurator().apply(config);
+        this.isConfiguredWithPID = isConfiguredWithPID;
+        this.spark = null;
+        this.sparkConfig = null;
+        this.motorType = MotorVendor.CTRE_TALON_FX;
+        this.canID = canID;
+        this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+        this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+    }
+
+
+
+
+
+
+    /**
+     * Uses a PID Loop to turn the motor to the desired position. (this should be called in periodic)
+     * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetPosition(double position) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(positionDutyCycle.withPosition(position));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        }
+    }
+
+    /**
+     * Uses a PID Loop to turn the motor to the desired position. (this should be called in periodic)
+     * Also includes whether to use FOC. This will allow your motor to run 15% faster for some trade offs.
+     * FOC only works on Kraken Motors (Talon FX), and it requires a paid Pheonix Pro license that should be applied in Pheonix Tuner X. 
+     * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
+     * @param enableFOC whether or not to use FOC.
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetPosition(double position, boolean enableFOC) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(positionDutyCycle.withPosition(position).withEnableFOC(enableFOC));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        }
+    }
+    
+    /**
+     * Uses a PID Loop to turn the motor to the desired position. (this should be called in periodic)
+     * Also includes the feedForwardOutput that you want to apply to this motor.
+     * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
+     * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetPosition(double position, double feedforwardOutput) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforwardOutput);
+        }
+    }
+
+    /**
+     * Uses a PID Loop to turn the motor to the desired position. (this should be called in periodic)
+     * Also includes the feedForwardOutput that you want to apply to this motor.
+     * Also includes whether to use FOC. This will allow your motor to run 15% faster for some trade offs.
+     * FOC only works on Kraken Motors (Talon FX), and it requires a paid Pheonix Pro license that should be applied in Pheonix Tuner X. 
+     * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
+     * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
+     * @param enableFOC whether or not to use FOC.
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetPosition(double position, double feedforwardOutput, boolean enableFOC) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput).withEnableFOC(enableFOC));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforwardOutput);
+        }
+    }
+
+
+
+
+
+
+    /**
+     * Uses a PID Loop to run the motor at the desired velocity. (this should be called in periodic)
+     * @param velocity the desired velocity of the motor. This will already include any calulations done in ConversionConfig 
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetVelocity(double velocity) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(velocityDutyCycle.withVelocity(velocity));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        }
+    }
+
+    /**
+     * Uses a PID Loop to run the motor at the desired velocity. (this should be called in periodic)
+     * Also includes whether to use FOC. This will allow your motor to run 15% faster for some trade offs.
+     * FOC only works on Kraken Motors (Talon FX), and it requires a paid Pheonix Pro license that should be applied in Pheonix Tuner X. 
+     * @param velocity the desired velocity of the motor. This will already include any calulations done in ConversionConfig 
+     * @param enableFOC whether or not to use FOC.
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetVelocity(double velocity, boolean enableFOC) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(velocityDutyCycle.withVelocity(velocity).withEnableFOC(enableFOC));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        }
+    }
+
+    /**
+     * Uses a PID Loop to run the motor at the desired velocity. (this should be called in periodic)
+     * Also includes the feedForwardOutput that you want to apply to this motor.
+     * @param velocity the desired velocity of the motor. This will already include any calulations done in ConversionConfig 
+     * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetVelocity(double velocity, double feedForwardOutput) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedForwardOutput);
+        }
+    }
+
+    /**
+     * Uses a PID Loop to run the motor at the desired velocity. (this should be called in periodic)
+     * Also includes the feedForwardOutput that you want to apply to this motor.
+     * Also includes whether to use FOC. This will allow your motor to run 15% faster for some trade offs.
+     * FOC only works on Kraken Motors (Talon FX), and it requires a paid Pheonix Pro license that should be applied in Pheonix Tuner X. 
+     * @param velocity the desired velocity of the motor. This will already include any calulations done in ConversionConfig 
+     * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
+     * @param enableFOC whether or not to use FOC.
+     * @throws IncorrectUseOfPIDException
+     */
+    public void setTargetVelocity(double velocity, double feedForwardOutput, boolean enableFOC) throws IncorrectUseOfPIDException {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput).withEnableFOC(enableFOC));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedForwardOutput);
+        }
+    }
+
+
+
+
+
+
+    /**
+     * Common interface for setting the speed of a speed controller. IF you have configured this motor to run with PID, DO NOT USE THIS.
+     * @param speed The speed to set. Value should be between -1.0 and 1.0.
+     */
+    public void set(double speed) throws IncorrectUseOfPIDException {
+        if (this.isConfiguredWithPID) {
+            throw new IncorrectUseOfPIDException(
+                "Attempted to use motor.set(speed) on a motor that is configured to use PID. This action will make the motor fight with itself. " + 
+                "If you want to make the motor go at a certain speed, tune the PID for velocity and do motor.setTargetVelocity(velocity), which will use the PID loop to run at a certain speed. " +
+                "The motor this happened to has the CAN ID: " + this.canID
+            );
+        } 
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.set(speed);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.set(speed);
+        }
+    }
+
+    /**
+     * Gets the position of the encoder. Note that this position has already been scaled
+     * according to the value in the ConversionConfig object that was used to create the MotorConfig object.
+     * @return The amount of rotations
+     */
+    public double getPosition() {
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            return talon.getPosition().getValue().in(Units.Rotations);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            return spark.getEncoder().getPosition();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Gets the angluar velocity of the motor. Note that this velocity has already been scaled
+     * according to the value in the ConversionConfig object that was used to create the MotorConfig object.
+     * @return the velocity in RPM
+     */
+    public double getVelocity() {
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            return talon.getVelocity().getValue().in(Units.RPM);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            return spark.getEncoder().getVelocity();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Changes the Idle Behavior of the motor (the behavior when the motor is not receiving commands or when the robot is disabled)
+     * @param newBehavior the new idle behavior
+     */
+    public void changeIdleBehavior(IdleBehavior newBehavior) {
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setNeutralMode(newBehavior == IdleBehavior.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            sparkConfig.idleMode(newBehavior == IdleBehavior.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
+            ErrorHandling.handlRevLibError(
+                spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+                "configuring motor " + canID
+            );
+        }
+    }
+
+    private void checkForPID() throws IncorrectUseOfPIDException {
+        if (!this.isConfiguredWithPID) {
+            throw new IncorrectUseOfPIDException(
+                "Attempted to use PID on a motor that was not configured with PID Constants." +
+                "The motor this happened to has the CAN ID: " + this.canID
+            );
+        }
+    }
+}
