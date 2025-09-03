@@ -1,7 +1,7 @@
-API
-===
+POPLib API Documentation
+========================
 
-.. autosummary::
-   :toctree: generated
+.. toctree::
 
-   lumache
+    base
+    application

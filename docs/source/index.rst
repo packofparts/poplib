@@ -1,22 +1,21 @@
-Welcome to Lumache's documentation!
+Welcome to POPLib documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**POPLib** is a FRC Java library that uses Vendor API's and WPILIB to make FRC robot programming easy.
+It allows for the easy and safe creation of basic hardware components, such as Motors, Gyros, BeamBreak Sensors, Photonvision Cameras, Limelight Cameras, etc.
+POPLib also includes subsystem bases so that the programming of more complex subsystems such as Swerve, Elevators, Pivots, Intakes, etc. are simple. 
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+Check out the :doc:`installation` section to get started with installing POPLib.
 
 .. note::
 
-   This project is under active development.
+   This documentation is for POPLibv2, which is in active development and the first production release will be before 2026.
 
 Contents
 --------
 
 .. toctree::
 
-   usage
+   installation
+   overview
    api

@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'POPLib'
+copyright = '2025, Pack of Parts'
+author = 'Vishruth Rao and Team 1294 Programming subteam'
 
 release = '0.1'
 version = '0.1.0'
