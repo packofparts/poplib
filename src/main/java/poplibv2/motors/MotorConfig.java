@@ -9,7 +9,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import poplibv2.control_systems.PIDConfig;
 
 /**
- * A container for all the Contansts a Motor needs. Also in charge of creating a motor object.
+ * A container for all the Contansts a Motor needs.
  */
 public class MotorConfig {
     private int canID;
@@ -21,7 +21,6 @@ public class MotorConfig {
     private IdleBehavior idleMode;
     private ConversionConfig conversionConfig;
     private boolean isConfiguredWithPID;
-    private Motor motor = null; // used to mimic "singleton" behavior
 
     /**
      * The constuctor for creating the motorConfig
@@ -82,18 +81,30 @@ public class MotorConfig {
         return config;
     }
 
+    /**
+     * @return the motor vendor enum
+     */
     public MotorVendor getMotorVendor() {
         return this.motorVendor;
     }
     
+    /**
+     * @return the can id of the motor
+     */
     public int getCANID() {
         return this.canID;
     }
     
+    /**
+     * @return the can bus to create the motor
+     */
     public String getCANBUS() {
         return this.canBUS;
     }
 
+    /**
+     * @return whether or not to use pid
+     */
     public boolean getIsConfiguredWithPID() {
         return this.isConfiguredWithPID;
     }

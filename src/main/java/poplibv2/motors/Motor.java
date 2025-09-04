@@ -1,6 +1,5 @@
 package poplibv2.motors;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -16,7 +15,9 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.units.Units;
 import poplib.error_handling.ErrorHandling;
+import poplibv2.errors.DuplicatedCANIDException;
 import poplibv2.errors.IncorrectUseOfPIDException;
+import poplibv2.misc.CanIdRegistry;
 
 
 public class Motor {
@@ -34,8 +35,9 @@ public class Motor {
      * Creates a new motor using the motor config.
      * @param config The config to use when creating the motor.
      */
-    public Motor(MotorConfig config) {
+    public Motor(MotorConfig config) throws DuplicatedCANIDException {
         this.canID = config.getCANID();
+        CanIdRegistry.getRegistry().registerCanId(canID);
         this.motorType = config.getMotorVendor();
         if (this.motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             this.spark = new SparkMax(canID, MotorType.kBrushless);

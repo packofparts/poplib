@@ -12,7 +12,7 @@ public class CameraConfig {
     public final AprilTagFields aprilTagField;
 
     /**
-     * Creates a new CameraConfig that should be passed into a Camera Object. 
+     * Creates a new CameraConfig that can be used to create a new Camera Object. 
      * This will be used when creating a new PhotonVision Camera
      * @param cameraName The camera name, as set in the PhotonVision Dashboard (Note: this is the CAMERA name, not the name of the computer running photonvision)
      * @param cameraToRobot A 3d vector detailing the difference in positions between the center of the robot (where the gyro is) and the focal lens of the camera. See the WPILIB robot coordinate system on how to do this
