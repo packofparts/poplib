@@ -1,6 +1,8 @@
-package poplibv2.errors;
+package poplibv2.misc;
 
 import com.revrobotics.REVLibError;
+
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class ErrorHandling {
     /**
@@ -13,4 +15,19 @@ public class ErrorHandling {
             System.out.println("REVLibError: " + error.toString() + " when " + useCase);
         }
     } 
+
+    /**
+     * Complains about pid.
+     */
+    public static void complainAboutIncorrectUseOfPID(String m) {
+        DriverStation.reportError("IncorrectUseOfPIDException: " + m, false);
+    }
+    
+
+    /**
+     * Complains about CAN.
+     */
+    public static void complainAboutDuplicatedCANIDException(String m) {
+        DriverStation.reportError("DuplicatedCANIDException: " + m, false);
+    }
 }

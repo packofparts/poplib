@@ -2,7 +2,7 @@ package poplibv2.misc;
 
 import java.util.HashSet;
 
-import poplibv2.errors.DuplicatedCANIDException;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class CanIdRegistry {
     static CanIdRegistry registry = null;
@@ -19,11 +19,11 @@ public class CanIdRegistry {
         set = new HashSet<>();
     }
 
-    public void registerCanId(int id) throws DuplicatedCANIDException {
+    public void registerCanId(int id) {
         int firstLength = set.size();
         set.add(id);
         if (set.size() == firstLength) {
-            throw new DuplicatedCANIDException("Duplicate Can Id number " + id + " was used. Duplicate Can Ids lead to confusion during debugging and possibly errors. Dont use them.");
+            ErrorHandling.complainAboutDuplicatedCANIDException("Duplicate Can Id number " + id + " was used. Duplicate Can Ids lead to confusion during debugging and possibly errors. Dont use them.");
         }
     }
 }

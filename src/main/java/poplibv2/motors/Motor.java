@@ -14,10 +14,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.units.Units;
-import poplib.error_handling.ErrorHandling;
-import poplibv2.errors.DuplicatedCANIDException;
-import poplibv2.errors.IncorrectUseOfPIDException;
 import poplibv2.misc.CanIdRegistry;
+import poplibv2.misc.ErrorHandling;
 
 
 public class Motor {
@@ -35,14 +33,14 @@ public class Motor {
      * Creates a new motor using the motor config.
      * @param config The config to use when creating the motor.
      */
-    public Motor(MotorConfig config) throws DuplicatedCANIDException {
+    public Motor(MotorConfig config) {
         this.canID = config.getCANID();
         CanIdRegistry.getRegistry().registerCanId(canID);
         this.motorType = config.getMotorVendor();
         if (this.motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             this.spark = new SparkMax(canID, MotorType.kBrushless);
             this.sparkConfig = config.createSparkMaxConfig();
-            ErrorHandling.handlRevLibError(
+            ErrorHandling.handleRevLibError(
                 spark.configure(this.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID
             );
@@ -66,7 +64,7 @@ public class Motor {
      * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetPosition(double position) throws IncorrectUseOfPIDException {
+    public void setTargetPosition(double position) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(positionDutyCycle.withPosition(position));
@@ -83,7 +81,7 @@ public class Motor {
      * @param enableFOC whether or not to use FOC.
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetPosition(double position, boolean enableFOC) throws IncorrectUseOfPIDException {
+    public void setTargetPosition(double position, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(positionDutyCycle.withPosition(position).withEnableFOC(enableFOC));
@@ -99,7 +97,7 @@ public class Motor {
      * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetPosition(double position, double feedforwardOutput) throws IncorrectUseOfPIDException {
+    public void setTargetPosition(double position, double feedforwardOutput) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput));
@@ -118,7 +116,7 @@ public class Motor {
      * @param enableFOC whether or not to use FOC.
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetPosition(double position, double feedforwardOutput, boolean enableFOC) throws IncorrectUseOfPIDException {
+    public void setTargetPosition(double position, double feedforwardOutput, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput).withEnableFOC(enableFOC));
@@ -137,7 +135,7 @@ public class Motor {
      * @param velocity the desired velocity of the motor. This will already include any calulations done in ConversionConfig 
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetVelocity(double velocity) throws IncorrectUseOfPIDException {
+    public void setTargetVelocity(double velocity) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(velocityDutyCycle.withVelocity(velocity));
@@ -154,7 +152,7 @@ public class Motor {
      * @param enableFOC whether or not to use FOC.
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetVelocity(double velocity, boolean enableFOC) throws IncorrectUseOfPIDException {
+    public void setTargetVelocity(double velocity, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(velocityDutyCycle.withVelocity(velocity).withEnableFOC(enableFOC));
@@ -170,7 +168,7 @@ public class Motor {
      * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetVelocity(double velocity, double feedForwardOutput) throws IncorrectUseOfPIDException {
+    public void setTargetVelocity(double velocity, double feedForwardOutput) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput));
@@ -189,7 +187,7 @@ public class Motor {
      * @param enableFOC whether or not to use FOC.
      * @throws IncorrectUseOfPIDException
      */
-    public void setTargetVelocity(double velocity, double feedForwardOutput, boolean enableFOC) throws IncorrectUseOfPIDException {
+    public void setTargetVelocity(double velocity, double feedForwardOutput, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput).withEnableFOC(enableFOC));
@@ -207,9 +205,9 @@ public class Motor {
      * Common interface for setting the speed of a speed controller. IF you have configured this motor to run with PID, DO NOT USE THIS.
      * @param speed The speed to set. Value should be between -1.0 and 1.0.
      */
-    public void set(double speed) throws IncorrectUseOfPIDException {
+    public void set(double speed)  {
         if (this.isConfiguredWithPID) {
-            throw new IncorrectUseOfPIDException(
+            ErrorHandling.complainAboutIncorrectUseOfPID(
                 "Attempted to use motor.set(speed) on a motor that is configured to use PID. This action will make the motor fight with itself. " + 
                 "If you want to make the motor go at a certain speed, tune the PID for velocity and do motor.setTargetVelocity(velocity), which will use the PID loop to run at a certain speed. " +
                 "The motor this happened to has the CAN ID: " + this.canID
@@ -259,16 +257,16 @@ public class Motor {
             talon.setNeutralMode(newBehavior == IdleBehavior.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             sparkConfig.idleMode(newBehavior == IdleBehavior.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
-            ErrorHandling.handlRevLibError(
+            ErrorHandling.handleRevLibError(
                 spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID
             );
         }
     }
 
-    private void checkForPID() throws IncorrectUseOfPIDException {
+    private void checkForPID() {
         if (!this.isConfiguredWithPID) {
-            throw new IncorrectUseOfPIDException(
+            ErrorHandling.complainAboutIncorrectUseOfPID(
                 "Attempted to use PID on a motor that was not configured with PID Constants." +
                 "The motor this happened to has the CAN ID: " + this.canID
             );
