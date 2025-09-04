@@ -31,54 +31,33 @@ public class Motor {
     private VelocityDutyCycle velocityDutyCycle;
 
     /**
-     * POPLIB INTERNAL FUNCTION.
-     * <p></p>
-     * Handles the creation and configuration of a SparkMax motor. Do not use this to create a motor in the robot code. 
-     * This should only be called by other POPLib file (mostly just MotorConfig.java). If you want to create a motor, create a  
-     * MotorConfig object and call the createMotor() function.
-     * @param config The SparkMax Config to apply to the newly created motor
-     * @param canID The location of the motor on the canBUS.
+     * Creates a new motor using the motor config.
+     * @param config The config to use when creating the motor.
      */
-    public Motor(SparkMaxConfig config, int canID, boolean isConfiguredWithPID) {
-        this.spark = new SparkMax(canID, MotorType.kBrushless);
-        this.canID = canID;
-        this.sparkConfig = config;
-        this.isConfiguredWithPID = isConfiguredWithPID;
-        ErrorHandling.handlRevLibError(
-            spark.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
-            "configuring motor " + canID
-        );
-        this.talon = null;
-        this.motorType = MotorVendor.REV_ROBOTICS_SPARK_MAX;
-        this.positionDutyCycle = null;
-        this.velocityDutyCycle = null;
+    public Motor(MotorConfig config) {
+        this.canID = config.getCANID();
+        this.motorType = config.getMotorVendor();
+        if (this.motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            this.spark = new SparkMax(canID, MotorType.kBrushless);
+            this.sparkConfig = config.createSparkMaxConfig();
+            ErrorHandling.handlRevLibError(
+                spark.configure(this.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+                "configuring motor " + canID
+            );
+            this.talon = null;
+            this.motorType = MotorVendor.REV_ROBOTICS_SPARK_MAX;
+            this.positionDutyCycle = null;
+            this.velocityDutyCycle = null;
+        } else if (this.motorType == MotorVendor.CTRE_TALON_FX) {
+            talon = new TalonFX(canID, config.getCANBUS());
+            talon.getConfigurator().apply(config.createTalonFXConfiguration());
+            this.spark = null;
+            this.sparkConfig = null;
+            this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+            this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+        }
+        this.isConfiguredWithPID = config.getIsConfiguredWithPID();
     }
-
-    /**
-     * POPLIB INTERNAL FUNCTION.
-     * <p></p>
-     * Handles the creation and configuration of a TalonFX motor. Do not use this to create a motor in the robot code. 
-     * This should only be called by other POPLib file (mostly just MotorConfig.java). If you want to create a motor, create a  
-     * MotorConfig object and call the createMotor() function.
-     * @param config The SparkMax Config to apply to the newly created motor
-     * @param canID The location of the motor on the canBUS.
-     */
-    public Motor(TalonFXConfiguration config, int canID, String canBus, boolean isConfiguredWithPID) {
-        talon = new TalonFX(canID, canBus);
-        talon.getConfigurator().apply(config);
-        this.isConfiguredWithPID = isConfiguredWithPID;
-        this.spark = null;
-        this.sparkConfig = null;
-        this.motorType = MotorVendor.CTRE_TALON_FX;
-        this.canID = canID;
-        this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
-        this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
-    }
-
-
-
-
-
 
     /**
      * Uses a PID Loop to turn the motor to the desired position. (this should be called in periodic)

@@ -52,7 +52,7 @@ public class MotorConfig {
      * Used to apply the current MotorConfig and fit it into a SparkMaxConfig
      * @return The SparkMaxConfig object
      */
-    private SparkMaxConfig createSparkMaxConfig() {
+    public SparkMaxConfig createSparkMaxConfig() {
         SparkMaxConfig config = new SparkMaxConfig();
 
         config.inverted(inverted);
@@ -70,7 +70,7 @@ public class MotorConfig {
      * Used to apply the current MotorConfig and fit it into a TalonFXConfiguration
      * @return The TalonFXConfiguration object
      */
-    private TalonFXConfiguration createTalonFXConfiguration() {
+    public TalonFXConfiguration createTalonFXConfiguration() {
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.CurrentLimits.StatorCurrentLimit = currentLimit;
         config.CurrentLimits.SupplyCurrentLimitEnable = false;
@@ -82,24 +82,19 @@ public class MotorConfig {
         return config;
     }
 
-    /**
-     * Creates a new Motor. If you have already created a motor using this MotorConfig, 
-     * it returns the same Motor object. This is to stop your project from crashing by 
-     * creating multiple Motors objects referencing the same motor.
-     * @return
-     */
-    public Motor createMotor() {
-        if (motor != null) {
-            return motor;
-        }
-        if (motorVendor == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
-            SparkMaxConfig config = createSparkMaxConfig();
-            motor = new Motor(config, canID, isConfiguredWithPID);
-            return motor;
-        } else {
-            TalonFXConfiguration config = createTalonFXConfiguration();
-            motor = new Motor(config, canID, canBUS, isConfiguredWithPID);
-            return motor;
-        }
+    public MotorVendor getMotorVendor() {
+        return this.motorVendor;
+    }
+    
+    public int getCANID() {
+        return this.canID;
+    }
+    
+    public String getCANBUS() {
+        return this.canBUS;
+    }
+
+    public boolean getIsConfiguredWithPID() {
+        return this.isConfiguredWithPID;
     }
 }
