@@ -37,6 +37,7 @@ public class Motor {
         this.canID = config.getCANID();
         CanIdRegistry.getRegistry().registerCanId(canID);
         this.motorType = config.getMotorVendor();
+
         if (this.motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             this.spark = new SparkMax(canID, MotorType.kBrushless);
             this.sparkConfig = config.createSparkMaxConfig();
@@ -48,7 +49,9 @@ public class Motor {
             this.motorType = MotorVendor.REV_ROBOTICS_SPARK_MAX;
             this.positionDutyCycle = null;
             this.velocityDutyCycle = null;
-        } else if (this.motorType == MotorVendor.CTRE_TALON_FX) {
+        } 
+        
+        else if (this.motorType == MotorVendor.CTRE_TALON_FX) {
             talon = new TalonFX(canID, config.getCANBUS());
             talon.getConfigurator().apply(config.createTalonFXConfiguration());
             this.spark = null;
@@ -56,6 +59,7 @@ public class Motor {
             this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
             this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
         }
+
         this.isConfiguredWithPID = config.getIsConfiguredWithPID();
     }
 
@@ -200,7 +204,6 @@ public class Motor {
 
 
 
-
     /**
      * Common interface for setting the speed of a speed controller. IF you have configured this motor to run with PID, DO NOT USE THIS.
      * @param speed The speed to set. Value should be between -1.0 and 1.0.
@@ -218,6 +221,16 @@ public class Motor {
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.set(speed);
         }
+    }
+
+    /**
+     * Returns whether or not the motor has reached its setpoint.
+     * @param setpoint the setpoint to use when checking motor position
+     * @param error the allowed error
+     * @return Whether or not the motor has reached its setpoint within the allowed error.
+     */
+    public boolean atPositionSetpoint(double setpoint, double error) {
+        return Math.abs(setpoint - getPosition()) < error;
     }
 
     /**
