@@ -1,5 +1,6 @@
 package poplibv2.motors;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -14,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.units.Units;
+import poplibv2.control_systems.PIDConfig;
 import poplibv2.misc.CanIdRegistry;
 import poplibv2.misc.ErrorHandling;
 
@@ -270,6 +272,25 @@ public class Motor {
             talon.setNeutralMode(newBehavior == IdleBehavior.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             sparkConfig.idleMode(newBehavior == IdleBehavior.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
+            ErrorHandling.handleRevLibError(
+                spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+                "configuring motor " + canID
+            );
+        }
+    }
+
+
+    public void changePID(PIDConfig config) {
+        checkForPID();
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            Slot0Configs slot0Configs = new Slot0Configs();
+            slot0Configs.kV = config.F;
+            slot0Configs.kP = config.P;
+            slot0Configs.kI = config.I;
+            slot0Configs.kD = config.D;
+            talon.getConfigurator().apply(slot0Configs);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            config.applyToMotor(sparkConfig);
             ErrorHandling.handleRevLibError(
                 spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID

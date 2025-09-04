@@ -10,10 +10,10 @@ import edu.wpi.first.math.controller.PIDController;
  * Respondible for holding PID constants and applying them to a motor.
  */
 public class PIDConfig {
-    private int P;
-    private int I;
-    private int D;
-    private int F;
+    public double P;
+    public double I;
+    public double D;
+    public double F;
     private boolean usePID;
 
     /**
@@ -25,7 +25,7 @@ public class PIDConfig {
      * @param D the dervirative value multiplier of the your PID Controller
      * @param F the velocity Feedforward value
      */
-    public PIDConfig(int P, int I, int D, int F) {
+    public PIDConfig(double P, double I, double D, double F) {
         this.P = P;
         this.I = I;
         this.D = D;
