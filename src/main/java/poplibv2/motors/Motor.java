@@ -1,6 +1,9 @@
 package poplibv2.motors;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,29 +29,34 @@ public class Motor {
     private TalonFX talon;
     private int canID;
     private MotorVendor motorType;
-    private SparkMaxConfig sparkConfig;     // needed to change idle mode
+    private MotorConfig config;
     private boolean isConfiguredWithPID;
     private PositionDutyCycle positionDutyCycle;
     private VelocityDutyCycle velocityDutyCycle;
+    private ArrayList<SparkMax> sparkFollowers;
+    private ArrayList<TalonFX> talonFollowers;
 
     /**
      * Creates a new motor using the motor config.
+     * Since a motor is a CAN Device, it registers it's id in the 
+     * CAN ID Registry to make sure duplicate motors are not created.
      * @param config The config to use when creating the motor.
      */
     public Motor(MotorConfig config) {
         this.canID = config.getCANID();
         CanIdRegistry.getRegistry().registerCanId(canID);
         this.motorType = config.getMotorVendor();
+        this.sparkFollowers = new ArrayList<>();
+        this.talonFollowers = new ArrayList<>();
+        this.config = config;
 
         if (this.motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             this.spark = new SparkMax(canID, MotorType.kBrushless);
-            this.sparkConfig = config.createSparkMaxConfig();
             ErrorHandling.handleRevLibError(
-                spark.configure(this.sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+                spark.configure(config.createSparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID
             );
             this.talon = null;
-            this.motorType = MotorVendor.REV_ROBOTICS_SPARK_MAX;
             this.positionDutyCycle = null;
             this.velocityDutyCycle = null;
         } 
@@ -57,12 +65,11 @@ public class Motor {
             talon = new TalonFX(canID, config.getCANBUS());
             talon.getConfigurator().apply(config.createTalonFXConfiguration());
             this.spark = null;
-            this.sparkConfig = null;
             this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
             this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
         }
 
-        this.isConfiguredWithPID = config.getIsConfiguredWithPID();
+        this.isConfiguredWithPID = config.getIsConfiguredWithPID(); // yes this needs to be here.
     }
 
     /**
@@ -236,6 +243,16 @@ public class Motor {
     }
 
     /**
+     * Returns whether or not the motor has reached its setpoint.
+     * @param setpoint the setpoint to use when checking motor position
+     * @param error the allowed error
+     * @return Whether or not the motor has reached its setpoint within the allowed error.
+     */
+    public boolean atVelocitySetpoint(double setpoint, double error) {
+        return Math.abs(setpoint - getVelocity()) < error;
+    }
+
+    /**
      * Gets the position of the encoder. Note that this position has already been scaled
      * according to the value in the ConversionConfig object that was used to create the MotorConfig object.
      * @return The amount of rotations
@@ -271,6 +288,7 @@ public class Motor {
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             talon.setNeutralMode(newBehavior == IdleBehavior.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            SparkMaxConfig sparkConfig = config.createSparkMaxConfig();
             sparkConfig.idleMode(newBehavior == IdleBehavior.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
             ErrorHandling.handleRevLibError(
                 spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
@@ -280,21 +298,54 @@ public class Motor {
     }
 
 
-    public void changePID(PIDConfig config) {
+    /**
+     * Changes the PID Settings applied to this motor.
+     * @param pidConfig the new PID Config to use.
+     */
+    public void changePID(PIDConfig pidConfig) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
             Slot0Configs slot0Configs = new Slot0Configs();
-            slot0Configs.kV = config.F;
-            slot0Configs.kP = config.P;
-            slot0Configs.kI = config.I;
-            slot0Configs.kD = config.D;
+            slot0Configs.kV = pidConfig.F;
+            slot0Configs.kP = pidConfig.P;
+            slot0Configs.kI = pidConfig.I;
+            slot0Configs.kD = pidConfig.D;
             talon.getConfigurator().apply(slot0Configs);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
-            config.applyToMotor(sparkConfig);
+            SparkMaxConfig sparkConfig = config.createSparkMaxConfig();
+            pidConfig.applyToMotor(sparkConfig);
             ErrorHandling.handleRevLibError(
                 spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID
             );
+        }
+    }
+
+    /**
+     * Creates a new motor and sets it up to automatically follow the actions of this Motor.
+     * Note: you do not get access to the newly created motor, you actually don't need it.
+     * Just tell this motor what to do and the follower motor will do the same thing using 
+     * most of the same configs that were used to make this motor (including PID and Conversion Configs).
+     * This also regisiters the follower motor CAN ID in the CAN ID Registry.
+     * @param CANID The CAN Id of the FOLLOWER Motor
+     * @param inverted Whether or not the motor should do the exact same (false) or exact opposite (true) of what this motor is doing
+     */
+    public void addFollowerMotor(int CANID, boolean inverted) {
+        CanIdRegistry.getRegistry().registerCanId(CANID);
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            TalonFX talonFollower = new TalonFX(CANID);
+            talonFollower.getConfigurator().apply(config.createTalonFXConfiguration());
+            talonFollower.setControl(new Follower(canID, inverted));
+            talonFollowers.add(talonFollower);
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            SparkMax sparkFollower = new SparkMax(CANID, SparkMax.MotorType.kBrushless);
+            SparkMaxConfig sparkConfig = config.createSparkMaxConfig();
+            sparkConfig.follow(canID, inverted);
+            ErrorHandling.handleRevLibError(
+                sparkFollower.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
+                "configuring follower motor " + CANID
+            );
+            sparkFollowers.add(sparkFollower);
         }
     }
 

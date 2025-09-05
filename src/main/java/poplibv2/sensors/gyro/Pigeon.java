@@ -1,7 +1,6 @@
 package poplibv2.sensors.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.configs.GyroTrimConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
@@ -11,6 +10,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import poplibv2.misc.CanIdRegistry;
 
 
 public class Pigeon extends Gyro {
@@ -19,11 +19,13 @@ public class Pigeon extends Gyro {
     
     /**
      * Creates a new CTRE Pigeon Device (uses the Pigeon2 api)
+     * Since this is a CAN Device, the ID is registered in the CAN ID Registry to make sure duplicate IDs are not created.
      * @param id the CAN ID
      * @param inversion Whether or not the electrical subteam placed the gyro the wrong way
      * @param canBusName Pretty self explantory. Default should be "rio" 
      */
     public Pigeon(int id, boolean inversion, String canBusName) {
+        CanIdRegistry.getRegistry().registerCanId(id);
         gyro = new Pigeon2(id, canBusName);
         gyro.getConfigurator().apply(new Pigeon2Configuration());   // apperently this actually needs to be done
         this.inversion = inversion;

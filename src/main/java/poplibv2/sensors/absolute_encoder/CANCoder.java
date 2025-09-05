@@ -13,12 +13,13 @@ public class CANCoder {
 
     /**
      * Creates a new CANCoder (absolute encoder) using the CANCoderConfig
+     * Since this is a CAN Device, the ID is registered in the CAN ID Registry to make sure duplicate IDs are not created.
      * @param config the config to be used
      */
     public CANCoder(CANCoderConfig config) {
-        encoder = new CANcoder(config.id, config.CANBus);
         CanIdRegistry.getRegistry().registerCanId(config.id);
-
+        encoder = new CANcoder(config.id, config.CANBus);
+        
         CANcoderConfiguration sensorConfig = new CANcoderConfiguration();
         sensorConfig.MagnetSensor.SensorDirection = SensorDirectionValue.valueOf(config.inversion ? 1 : 0);
         sensorConfig.MagnetSensor.MagnetOffset = config.offset.getRotations();
