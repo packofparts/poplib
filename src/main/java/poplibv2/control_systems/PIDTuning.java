@@ -1,5 +1,7 @@
 package poplibv2.control_systems;
 
+import java.util.Optional;
+
 import poplibv2.misc.TunableNumber;
 import poplibv2.motors.Motor;
 
@@ -41,10 +43,11 @@ public class PIDTuning {
      * Updates the PID Constants on your motor using the constants on Smart Dashboard if tuning mode is on. 
      * @param motor
      */
-    public void updatePID(Motor motor){
+    public Optional<PIDConfig> generatePIDConfig(){
         if (isPIDChanged()) {
             PIDConfig config = new PIDConfig(kP.get(), kI.get(), kD.get(), kF.get());
-            motor.changePID(config);
+            return Optional.of(config);
         }
+        return Optional.empty();
     }
 }

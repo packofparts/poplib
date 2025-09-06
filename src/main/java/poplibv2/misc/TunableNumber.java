@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Class for a tunable number. This class gets a value from smart dashboard in tuning mode, 
  * it returns the default value if tuning mode is not on or the value is not in dashboard.
  */
-public class TunableNumber {
+public final class TunableNumber {
     private static final String tableKey = "TunableNumbers";
     private final String key;
     private double defaultValue;

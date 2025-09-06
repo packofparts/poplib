@@ -8,3 +8,4 @@ Application Layer POPLib Documentation
     application/pivot
     application/pnuematics
     application/flywheel
+    application/tunable numbers

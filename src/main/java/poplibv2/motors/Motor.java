@@ -1,11 +1,12 @@
 package poplibv2.motors;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -31,8 +32,8 @@ public class Motor {
     private MotorVendor motorType;
     private MotorConfig config;
     private boolean isConfiguredWithPID;
-    private PositionDutyCycle positionDutyCycle;
-    private VelocityDutyCycle velocityDutyCycle;
+    private PositionVoltage positionVoltage;
+    private VelocityVoltage velocityVoltage;
     private ArrayList<SparkMax> sparkFollowers;
     private ArrayList<TalonFX> talonFollowers;
 
@@ -57,16 +58,16 @@ public class Motor {
                 "configuring motor " + canID
             );
             this.talon = null;
-            this.positionDutyCycle = null;
-            this.velocityDutyCycle = null;
+            this.positionVoltage = null;
+            this.velocityVoltage = null;
         } 
         
         else if (this.motorType == MotorVendor.CTRE_TALON_FX) {
             talon = new TalonFX(canID, config.getCANBUS());
             talon.getConfigurator().apply(config.createTalonFXConfiguration());
             this.spark = null;
-            this.positionDutyCycle = new PositionDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
-            this.velocityDutyCycle = new VelocityDutyCycle(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+            this.positionVoltage = new PositionVoltage(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+            this.velocityVoltage = new VelocityVoltage(0.0).withSlot(talon.getClosedLoopSlot().getValue());
         }
 
         this.isConfiguredWithPID = config.getIsConfiguredWithPID(); // yes this needs to be here.
@@ -80,7 +81,7 @@ public class Motor {
     public void setTargetPosition(double position) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(positionDutyCycle.withPosition(position));
+            talon.setControl(positionVoltage.withPosition(position));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }
@@ -97,7 +98,7 @@ public class Motor {
     public void setTargetPosition(double position, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(positionDutyCycle.withPosition(position).withEnableFOC(enableFOC));
+            talon.setControl(positionVoltage.withPosition(position).withEnableFOC(enableFOC));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }
@@ -113,7 +114,7 @@ public class Motor {
     public void setTargetPosition(double position, double feedforwardOutput) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput));
+            talon.setControl(positionVoltage.withPosition(position).withFeedForward(feedforwardOutput));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforwardOutput);
         }
@@ -132,7 +133,7 @@ public class Motor {
     public void setTargetPosition(double position, double feedforwardOutput, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(positionDutyCycle.withPosition(position).withFeedForward(feedforwardOutput).withEnableFOC(enableFOC));
+            talon.setControl(positionVoltage.withPosition(position).withFeedForward(feedforwardOutput).withEnableFOC(enableFOC));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(position, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforwardOutput);
         }
@@ -151,7 +152,7 @@ public class Motor {
     public void setTargetVelocity(double velocity) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(velocityDutyCycle.withVelocity(velocity));
+            talon.setControl(velocityVoltage.withVelocity(velocity));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
         }
@@ -168,7 +169,7 @@ public class Motor {
     public void setTargetVelocity(double velocity, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(velocityDutyCycle.withVelocity(velocity).withEnableFOC(enableFOC));
+            talon.setControl(velocityVoltage.withVelocity(velocity).withEnableFOC(enableFOC));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
         }
@@ -184,7 +185,7 @@ public class Motor {
     public void setTargetVelocity(double velocity, double feedForwardOutput) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput));
+            talon.setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForwardOutput));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedForwardOutput);
         }
@@ -203,7 +204,7 @@ public class Motor {
     public void setTargetVelocity(double velocity, double feedForwardOutput, boolean enableFOC) {
         checkForPID();
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            talon.setControl(velocityDutyCycle.withVelocity(velocity).withFeedForward(feedForwardOutput).withEnableFOC(enableFOC));
+            talon.setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForwardOutput).withEnableFOC(enableFOC));
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.getClosedLoopController().setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedForwardOutput);
         }
@@ -318,6 +319,16 @@ public class Motor {
                 spark.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
                 "configuring motor " + canID
             );
+        }
+    }
+
+    /**
+     * Changes the PID Settings applied to this motor.
+     * @param pidConfig the optional PID Config to use. For use with the PIDTuning class.
+     */
+    public void changePID(Optional<PIDConfig> pidConfig) {
+        if (pidConfig.isPresent()) {
+            changePID(pidConfig.get());
         }
     }
 

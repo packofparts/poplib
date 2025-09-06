@@ -4,7 +4,7 @@ Base POPLib Documentation
 .. toctree::
 
     base/motors
-    base/PID
+    base/pid
     base/gyro
     base/absolute encoders
     base/camera
