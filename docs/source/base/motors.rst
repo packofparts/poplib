@@ -70,7 +70,11 @@ Now that you have created a MotorConfig object, we can create a new Motor like t
 
 .. note::
 
-    Whenever a CAN device (like a Motor) is created in POPLib, it is registered in the internal CAN ID Registry. If a duplicate CAN ID is found, an error message will be printed out to DriverStation (instead of actually crashing the robot program). Please take POPLib DriverStation error messages seriously. Duplicate CAN IDs make it difficult to debug a robot during competition and can lead to unexcepted errors.
+    Whenever a CAN device (like a Motor) is created in POPLib, it is registered in the internal 
+    CAN ID Registry. If a duplicate CAN ID is found, an error message will be printed out to 
+    DriverStation (instead of actually crashing the robot program). Please take POPLib DriverStation 
+    error messages seriously. Duplicate CAN IDs make it difficult to debug a robot during competition 
+    and can lead to unexcepted errors.
 
 Now that we have created our Motor, let us discuss how to use it. It is important to note
 that any methods/commands that use PID will be discussed in the :doc:`pid` Documentation.
