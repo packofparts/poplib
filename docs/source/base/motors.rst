@@ -117,7 +117,8 @@ object or Motor object for) to follow my lead motor. I would do something like t
 
 .. code-block:: java
 
-    motor.addFollower(Constants.SUBSYSTEM_NAME.followerCanId, Constants.SUBSYSTEM_NAME.followerShouldBeInverted);
+    FollowerConfig followerConfig = new FollowerConfig(Constants.FOLLOWER_CANID, Constants.FOLLOWER_INVERTED);
+    motor.addFollower();
 
 This will create a new motor behind the scenes and make it follow the commands of the lead motor 
 (the variable named "motor" in our examples. We need to pass in the CAN ID of the follower motor 

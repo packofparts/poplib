@@ -10,3 +10,4 @@ Base POPLib Documentation
     base/camera
     base/limelight
     base/beambreak
+    base/io

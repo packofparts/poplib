@@ -338,23 +338,22 @@ public class Motor {
      * Just tell this motor what to do and the follower motor will do the same thing using 
      * most of the same configs that were used to make this motor (including PID and Conversion Configs).
      * This also regisiters the follower motor CAN ID in the CAN ID Registry.
-     * @param CANID The CAN Id of the FOLLOWER Motor
-     * @param inverted Whether or not the motor should do the exact same (false) or exact opposite (true) of what this motor is doing
+     * @param followerConfig the follower config
      */
-    public void addFollowerMotor(int CANID, boolean inverted) {
-        CanIdRegistry.getRegistry().registerCanId(CANID);
+    public void addFollowerMotor(FollowerConfig followerConfig) {
+        CanIdRegistry.getRegistry().registerCanId(followerConfig.canID);
         if (motorType == MotorVendor.CTRE_TALON_FX) {
-            TalonFX talonFollower = new TalonFX(CANID);
+            TalonFX talonFollower = new TalonFX(followerConfig.canID);
             talonFollower.getConfigurator().apply(config.createTalonFXConfiguration());
-            talonFollower.setControl(new Follower(canID, inverted));
+            talonFollower.setControl(new Follower(canID, followerConfig.inverted));
             talonFollowers.add(talonFollower);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
-            SparkMax sparkFollower = new SparkMax(CANID, SparkMax.MotorType.kBrushless);
+            SparkMax sparkFollower = new SparkMax(followerConfig.canID, SparkMax.MotorType.kBrushless);
             SparkMaxConfig sparkConfig = config.createSparkMaxConfig();
-            sparkConfig.follow(canID, inverted);
+            sparkConfig.follow(canID, followerConfig.inverted);
             ErrorHandling.handleRevLibError(
                 sparkFollower.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters),
-                "configuring follower motor " + CANID
+                "configuring follower motor " + followerConfig.canID
             );
             sparkFollowers.add(sparkFollower);
         }
