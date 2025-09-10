@@ -9,6 +9,6 @@ Base POPLib Documentation
     base/absolute encoders
     base/camera
     base/limelight
-    base/beambreak
     base/io
+    base/beambreak
     base/tunable numbers

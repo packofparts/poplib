@@ -88,7 +88,7 @@ used for setTargetPosition/setTargetVelocity) and the tolerance/error is how clo
 setpoint. Note that this uses relative encoders.
 
 PID Tuning
-----------
+==========
 
 POPLib provides our own PIDTuning class that can be used to tune PID efficiently and easily. The class allows you 
 to change your PID variables on the fly, and all you have to do is set it up. All pre-made subsystem from POPLib that  
