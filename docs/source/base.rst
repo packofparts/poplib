@@ -11,3 +11,4 @@ Base POPLib Documentation
     base/limelight
     base/beambreak
     base/io
+    base/tunable numbers

@@ -52,7 +52,7 @@ Let us go through the parameters of this together. It is important to note that 
 (the desired position) is required. Also note that, behind the scenes, the gear ratio that you provided 
 in ConversionConfig (if you gave one) has already been applied to the motor. Thus, if you want the motor 
 to spin three rotations (and you applied the correct gear ratio) it will spin three rotations. If you haven't
-applied a gear ratio, that also fine. We recommend using :doc:`/application/tunable numbers` as your "setpoint"
+applied a gear ratio, that also fine. We recommend using :doc:`/base/tunable numbers` as your "setpoint"
 if you want to tune your setpoints. Of course, don't worry about this for now, as you will likely be using the 
 application layer of POPLib and POPLib's pre-made subsystems, which already have that fuctionality.
 
@@ -88,7 +88,7 @@ used for setTargetPosition/setTargetVelocity) and the tolerance/error is how clo
 setpoint. Note that this uses relative encoders.
 
 PID Tuning
-==========
+----------
 
 POPLib provides our own PIDTuning class that can be used to tune PID efficiently and easily. The class allows you 
 to change your PID variables on the fly, and all you have to do is set it up. All pre-made subsystem from POPLib that  
@@ -109,7 +109,7 @@ This will create a new motor and pidTuning class. The parameters of the PIDTunin
 name that will be used in SmartDashboard (to learn more about SmartDashboard read the WPILIB docs), the PIDConfig 
 object that you used to create the motor, and whether or not to turn on tuning mode. We are also using a new concept 
 called TunableNumbers, which is a number that can be update from SmartDashboard. For more information, see 
-:doc:`/application/tunable numbers`.
+:doc:`/base/tunable numbers`.
 
 .. note:: 
 

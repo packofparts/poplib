@@ -19,3 +19,6 @@ Contents
    installation
    overview
    api
+
+.. note:: 
+   Any comments made against the electrical subteam were made in jest and do not represent the actual views of the programming subteam or the documentation author. Actual disrespect of any kind is not tolerated at Pack of Parts.

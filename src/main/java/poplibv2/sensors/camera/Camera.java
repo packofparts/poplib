@@ -66,12 +66,6 @@ public class Camera {
                 for (var i : target) {
                     poses.add(i);
                 }
-                // Optional<Pose3d> pose = layout.getTagPose(target.getFiducialId());
-                // if (pose.isPresent()) {
-                //     poses.add(new Pose2d(
-                //         new Translation2d(target.getBestCameraToTarget().getX(), target.getBestCameraToTarget().getY()), 
-                //         Rotation2d.fromRadians(pose.get().getRotation().getZ())));
-                // }
             }
         }
 
@@ -83,11 +77,11 @@ public class Camera {
 
         if (ret1.isPresent()) {
         Optional<Pose3d> pose = layout.getTagPose(ret1.get().getFiducialId());
-                if (pose.isPresent()) {
-                    ret = Optional.of(new Pose2d(
-                        new Translation2d(ret1.get().getBestCameraToTarget().getX(), ret1.get().getBestCameraToTarget().getY()), 
-                        Rotation2d.fromRadians(pose.get().getRotation().getZ())));
-                }}
+        if (pose.isPresent()) {
+            ret = Optional.of(new Pose2d(
+                new Translation2d(ret1.get().getBestCameraToTarget().getX(), ret1.get().getBestCameraToTarget().getY()), 
+                Rotation2d.fromRadians(pose.get().getRotation().getZ())));
+        }}
         return ret;
     } 
 
