@@ -116,7 +116,6 @@ public abstract class SwerveModule {
         // Prevents angle motor from turning further than it needs to. 
         // E.G. rotating from 10 to 270 degrees CW vs CCW.
         state = CTREModuleState.optimize(state, lastAngle);
-
         Rotation2d angle = Math.abs(state.speedMetersPerSecond) <= swerveModuleConstants.moduleInfo.maxSpeed.in(Units.MetersPerSecond) * (0.01)
             ? lastAngle
             :  state.angle;

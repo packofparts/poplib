@@ -1,5 +1,12 @@
 package poplib.swerve.swerve_templates;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -12,12 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import org.photonvision.EstimatedRobotPose;
-
 import poplib.sensors.camera.Camera;
 import poplib.sensors.camera.CameraConfig;
 import poplib.sensors.camera.DetectedObject;
@@ -25,7 +26,6 @@ import poplib.sensors.camera.Limelight;
 import poplib.sensors.camera.LimelightConfig;
 import poplib.sensors.gyro.Gyro;
 import poplib.swerve.swerve_modules.SwerveModule;
-import poplib.swerve.swerve_templates.BaseSwerve;
 
 public abstract class VisionBaseSwerve extends BaseSwerve {
    protected final SwerveDrivePoseEstimator odom;
@@ -67,7 +67,7 @@ public abstract class VisionBaseSwerve extends BaseSwerve {
          Camera camera = (Camera)var1.next();
          Optional<EstimatedRobotPose> estPose = camera.getEstimatedPose(this.getOdomPose());
          if (estPose.isPresent()) {
-            this.odom.addVisionMeasurement(((EstimatedRobotPose)estPose.get()).estimatedPose.toPose2d(), ((EstimatedRobotPose)estPose.get()).timestampSeconds, camera.getVisionStdDevs());
+            this.odom.addVisionMeasurement((estPose.get()).estimatedPose.toPose2d(), (estPose.get()).timestampSeconds, camera.getVisionStdDevs());
          }
       }
 
