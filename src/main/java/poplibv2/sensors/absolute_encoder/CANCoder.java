@@ -22,7 +22,7 @@ public class CANCoder {
         
         CANcoderConfiguration sensorConfig = new CANcoderConfiguration();
         sensorConfig.MagnetSensor.SensorDirection = SensorDirectionValue.valueOf(config.inversion ? 1 : 0);
-        sensorConfig.MagnetSensor.MagnetOffset = config.offset.getRotations();
+        sensorConfig.MagnetSensor.MagnetOffset = -config.offset.getRotations();
 
         encoder.getConfigurator().apply(sensorConfig);
     }

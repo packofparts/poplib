@@ -32,20 +32,7 @@ public class CTREModuleState {
         return new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
     }
 
-    public static SwerveModuleState optimizeWithPidWrapping(
-        SwerveModuleState desiredState, Rotation2d currentAngle
-    ) {
-        double targetAngle = currentAngle.getDegrees();
-        double targetSpeed = desiredState.speedMetersPerSecond;
-        double delta = targetAngle - currentAngle.getDegrees();
 
-        if (Math.abs(delta) > 90) {
-            targetSpeed = -targetSpeed;
-            targetAngle = delta > 90 ? (targetAngle -= 180) : (targetAngle += 180);
-        }        
-
-        return new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
-    }
 
     /**
      * Normalize Angle.

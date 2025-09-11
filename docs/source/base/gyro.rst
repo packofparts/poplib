@@ -10,7 +10,8 @@ To create a new Pigeon object simply do this:
 
 .. code-block:: java
     
-    Pigeon gyro = new Pigeon(Constants.GYRO_CAN_ID, Constants.GYRO_INVERTED, Constants.CAN_BUS_NAME);
+    PigeonConfig config = new PigeonConfig(Constants.GYRO_CAN_ID, Constants.GYRO_INVERTED, Constants.CAN_BUS_NAME)
+    Pigeon gyro = new Pigeon(config);
 
 The constructor is rather simple: it requires the CAN ID of the Pigeon, whether or not the Pigeon 
 is inverted (the front of your Pigeon should always be pointing to the front of your robot, and your 

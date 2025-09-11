@@ -19,6 +19,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import poplibv2.control_systems.PIDConfig;
 import poplibv2.misc.CanIdRegistry;
 import poplibv2.misc.ErrorHandling;
@@ -279,6 +280,15 @@ public class Motor {
             return spark.getEncoder().getVelocity();
         }
         return 0.0;
+    }
+
+    public Voltage getVoltage() {
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            return talon.getMotorVoltage().getValue();
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            return Units.Volts.of(spark.getBusVoltage());
+        }
+        return Units.Volts.of(0.0);
     }
 
     /**

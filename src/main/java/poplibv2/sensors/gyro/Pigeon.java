@@ -20,15 +20,13 @@ public class Pigeon extends Gyro {
     /**
      * Creates a new CTRE Pigeon Device (uses the Pigeon2 api)
      * Since this is a CAN Device, the ID is registered in the CAN ID Registry to make sure duplicate IDs are not created.
-     * @param id the CAN ID
-     * @param inversion Whether or not the electrical subteam placed the gyro the wrong way
-     * @param canBusName Pretty self explantory. Default should be "rio" 
+     * @param pigeonConfig the config of the pigeon
      */
-    public Pigeon(int id, boolean inversion, String canBusName) {
-        CanIdRegistry.getRegistry().registerCanId(id);
-        gyro = new Pigeon2(id, canBusName);
+    public Pigeon(PigeonConfig config) {
+        CanIdRegistry.getRegistry().registerCanId(config.id);
+        gyro = new Pigeon2(config.id, config.canBusName);
         gyro.getConfigurator().apply(new Pigeon2Configuration());   // apperently this actually needs to be done
-        this.inversion = inversion;
+        this.inversion = config.inversion;
     }
 
     @Override
