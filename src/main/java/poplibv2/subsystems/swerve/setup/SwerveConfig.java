@@ -1,5 +1,6 @@
 package poplibv2.subsystems.swerve.setup;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -43,9 +44,11 @@ public class SwerveConfig {
         int rotCurrentLimit,
         SwerveModuleType type,
         double wheelRadius,
+        Translation2d[] wheelPosForSDK,
         PigeonConfig gyroConfig, 
         CameraConfig[] cameraConfigs,
-        LimelightConfig[] limelightConfigs) {
+        LimelightConfig[] limelightConfigs,
+        boolean tuningMode) {
         
         if (moduleConstants.length != 4) {
             DriverStation.reportError("THERE ARE NOT 4 SWERVE MODULES!!!!!!!!!!!!!!! IM SCREAMING!!!! THIS WILL CRASH STUFF!!!!!", false);
@@ -66,8 +69,8 @@ public class SwerveConfig {
             CANCoderConfig canCoderConfig = new CANCoderConfig(moduleConstants[i].absEncCANID, CANBus, moduleConstants[i].absEncOffset, false);
             moduleConfigs[i] = new SwerveModuleConfig(driveMotorConfig, rotMotorConfig, canCoderConfig, i, type.maxSpeed);
         }
-
-        return new SwerveConfig(moduleConfigs, gyroConfig, wheelRadius, cameraConfigs, limelightConfigs);
+        tuningEnable = tuningMode;
+        return new SwerveConfig(moduleConfigs, gyroConfig, wheelRadius, cameraConfigs, limelightConfigs, wheelPosForSDK);
     }
 
     public SwerveModuleConfig[] swerveModuleConfigs;
@@ -75,12 +78,17 @@ public class SwerveConfig {
     public static Distance wheelCircumference;
     public CameraConfig[] cameraConfigs;
     public LimelightConfig[] limelightConfigs;
+    public static boolean tuningEnable;
+    public Translation2d[] wheelPos;
 
-    public SwerveConfig(SwerveModuleConfig[] swerveModuleConfigs, PigeonConfig gyro, double wheelRadius, CameraConfig[] cameraConfigs, LimelightConfig[] limelightConfigs) {
+    public SwerveConfig(SwerveModuleConfig[] swerveModuleConfigs, 
+        PigeonConfig gyro, double wheelRadius, CameraConfig[] cameraConfigs, 
+        LimelightConfig[] limelightConfigs, Translation2d[] wheelPos) {
         wheelCircumference = Units.Inches.of(4).times(Math.PI);
         this.swerveModuleConfigs = swerveModuleConfigs;
         this.gyro = gyro;
         this.cameraConfigs = cameraConfigs;
         this.limelightConfigs = limelightConfigs;
+        this.wheelPos = wheelPos;
     }
 }

@@ -187,4 +187,7 @@ public class SwerveModule {
         applySwerveModuleState(rotationsPerMinute, state.angle);
     }
 
+    public void runSysIdRoutine(double voltage) {
+        driveMotor.setTargetVelocity(100, voltage);
+    }
 }
