@@ -17,7 +17,7 @@ import poplibv2.sensors.gyro.PigeonConfig;
 public class SwerveConfig {
 
     /**
-     * 
+     * Creates a new SwerveConfig that can be used to create a new Swerve Drivetrain
      * @param moduleConstants [Top Left, Top Right, Bottom Left, Bottom Right]
      * @param CANBus
      * @param driveMotorType
@@ -27,7 +27,7 @@ public class SwerveConfig {
      * @param driveCurrentLimit
      * @param rotCurrentLimit
      * @param type
-     * @param wheelRadius the wheel radius in inches, default is 4
+     * @param wheelDiameter the wheel radius in inches, default is 4
      * @param gyroConfig
      * @param cameraConfigs
      * @param limelightConfigs
@@ -43,7 +43,7 @@ public class SwerveConfig {
         int driveCurrentLimit,
         int rotCurrentLimit,
         SwerveModuleType type,
-        double wheelRadius,
+        double wheelDiameter,
         Translation2d[] wheelPosForSDK,
         PigeonConfig gyroConfig, 
         CameraConfig[] cameraConfigs,
@@ -67,10 +67,10 @@ public class SwerveConfig {
                 moduleConstants[i].rotMotorCANID, CANBus, rotMotorType, rotPidConfig, rotCurrentLimit, false, IdleBehavior.BRAKE, rotConversion
             );
             CANCoderConfig canCoderConfig = new CANCoderConfig(moduleConstants[i].absEncCANID, CANBus, moduleConstants[i].absEncOffset, false);
-            moduleConfigs[i] = new SwerveModuleConfig(driveMotorConfig, rotMotorConfig, canCoderConfig, i, type.maxSpeed);
+            moduleConfigs[i] = new SwerveModuleConfig(driveMotorConfig, rotMotorConfig, canCoderConfig, i, type.maxSpeed, type.maxAngularVelocity);
         }
         tuningEnable = tuningMode;
-        return new SwerveConfig(moduleConfigs, gyroConfig, wheelRadius, cameraConfigs, limelightConfigs, wheelPosForSDK);
+        return new SwerveConfig(moduleConfigs, gyroConfig, wheelDiameter, cameraConfigs, limelightConfigs, wheelPosForSDK);
     }
 
     public SwerveModuleConfig[] swerveModuleConfigs;
@@ -82,9 +82,9 @@ public class SwerveConfig {
     public Translation2d[] wheelPos;
 
     public SwerveConfig(SwerveModuleConfig[] swerveModuleConfigs, 
-        PigeonConfig gyro, double wheelRadius, CameraConfig[] cameraConfigs, 
+        PigeonConfig gyro, double wheelDiameter, CameraConfig[] cameraConfigs, 
         LimelightConfig[] limelightConfigs, Translation2d[] wheelPos) {
-        wheelCircumference = Units.Inches.of(4).times(Math.PI);
+        wheelCircumference = Units.Inches.of(wheelDiameter).times(Math.PI);
         this.swerveModuleConfigs = swerveModuleConfigs;
         this.gyro = gyro;
         this.cameraConfigs = cameraConfigs;

@@ -32,6 +32,7 @@ public class Camera {
     private final Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
     private Matrix<N3, N1> currStdDevs = null;
     private AprilTagFieldLayout layout;
+    private List<PhotonPipelineResult> store;
 
     /**
      * Creates a new Photon Vision Camera
@@ -60,7 +61,7 @@ public class Camera {
         
         Optional<PhotonTrackedTarget> ret1 = Optional.empty();
         Optional<Pose2d> ret = Optional.empty();
-        for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
+        for (PhotonPipelineResult result : store) {
             if (result.hasTargets()) {
                 List<PhotonTrackedTarget> target = result.getTargets();
                 for (var i : target) {
@@ -106,7 +107,9 @@ public class Camera {
         }
         poseEstimator.setReferencePose(currPose);
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
-        for (PhotonPipelineResult change : camera.getAllUnreadResults()) {
+        store.clear();
+        store = camera.getAllUnreadResults();
+        for (PhotonPipelineResult change : store) {
             visionEst = poseEstimator.update(change);
             updateStdDevs(visionEst, change.getTargets());
         }

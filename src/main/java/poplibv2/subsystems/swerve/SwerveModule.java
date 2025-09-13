@@ -188,6 +188,7 @@ public class SwerveModule {
     }
 
     public void runSysIdRoutine(double voltage) {
-        driveMotor.setTargetVelocity(100, voltage);
+        driveMotor.setVoltage(voltage);
+        rotMotor.setTargetPosition(0.0);
     }
 }

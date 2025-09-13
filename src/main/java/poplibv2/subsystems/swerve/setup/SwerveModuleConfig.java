@@ -1,5 +1,6 @@
 package poplibv2.subsystems.swerve.setup;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import poplibv2.motors.MotorConfig;
 import poplibv2.sensors.absolute_encoder.CANCoderConfig;
@@ -10,6 +11,7 @@ public class SwerveModuleConfig {
     public CANCoderConfig canCoderConfig;
     public int id;
     public LinearVelocity maxSpeed;
+    public AngularVelocity maxAngularVelocity;
 
     /**
      * POPLIB INTERNAL FUNCTION.
@@ -19,12 +21,13 @@ public class SwerveModuleConfig {
      * @param canCoderConfig
      * @param id
      */
-    public SwerveModuleConfig(MotorConfig driveMotorConfig, MotorConfig rotMotorConfig, CANCoderConfig canCoderConfig, int id, LinearVelocity maxSpeed) {
+    public SwerveModuleConfig(MotorConfig driveMotorConfig, MotorConfig rotMotorConfig, CANCoderConfig canCoderConfig, int id, LinearVelocity maxSpeed, AngularVelocity maxAngularVelocity) {
         this.driveMotorConfig = driveMotorConfig;
         this.rotMotorConfig = rotMotorConfig;
         this.canCoderConfig = canCoderConfig;
         this.id = id;
         this.maxSpeed = maxSpeed;
+        this.maxAngularVelocity = maxAngularVelocity;
     }
     
 }

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -35,6 +36,7 @@ public class Motor {
     private boolean isConfiguredWithPID;
     private PositionVoltage positionVoltage;
     private VelocityVoltage velocityVoltage;
+    private VoltageOut voltageOut;
     private ArrayList<SparkMax> sparkFollowers;
     private ArrayList<TalonFX> talonFollowers;
 
@@ -61,6 +63,7 @@ public class Motor {
             this.talon = null;
             this.positionVoltage = null;
             this.velocityVoltage = null;
+            this.voltageOut = null;
         } 
         
         else if (this.motorType == MotorVendor.CTRE_TALON_FX) {
@@ -69,6 +72,7 @@ public class Motor {
             this.spark = null;
             this.positionVoltage = new PositionVoltage(0.0).withSlot(talon.getClosedLoopSlot().getValue());
             this.velocityVoltage = new VelocityVoltage(0.0).withSlot(talon.getClosedLoopSlot().getValue());
+            this.voltageOut = new VoltageOut(0.0);
         }
 
         this.isConfiguredWithPID = config.getIsConfiguredWithPID(); // yes this needs to be here.
@@ -231,6 +235,14 @@ public class Motor {
             talon.set(speed);
         } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
             spark.set(speed);
+        }
+    }
+
+    public void setVoltage(double voltage) {
+        if (motorType == MotorVendor.CTRE_TALON_FX) {
+            talon.setControl(voltageOut.withOutput(voltage));
+        } else if (motorType == MotorVendor.REV_ROBOTICS_SPARK_MAX) {
+            spark.setVoltage(voltage);
         }
     }
 

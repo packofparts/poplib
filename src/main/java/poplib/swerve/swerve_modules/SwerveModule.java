@@ -131,25 +131,4 @@ public abstract class SwerveModule {
     }
 
     public abstract void runSysIdRoutine(double voltage);
-
-    public LinearVelocity accelLimit(LinearVelocity newVelocity) {
-        LinearVelocity velocityChange = newVelocity.minus(lastVelo);
-        Time ellapsedTime = Units.Seconds.of(Timer.getFPGATimestamp()).minus(lastVeloTime);
-
-        // TODO: Update
-        // newVelocity = lastVelo.plus( 
-        //     (
-        //         Math.max(
-        //             velocityChange.div(ellapsedTime).abs(Units.MetersPerSecondPerSecond), 
-        //             swerveModuleConstants.moduleInfo.maxAcceleration.times(
-        //                 1 - lastVelo.div(swerveModuleConstants.moduleInfo.maxSpeed).magnitude()
-        //             ).in(Units.MetersPerSecondPerSecond)
-        //         ) 
-        //         * ellapsedTime.in(Units.Seconds) * (velocityChange.lt(Units.MetersPerSecond.of(0)) ? -1 : 1)));
-
-        lastVelo = newVelocity;
-        lastVeloTime.plus(ellapsedTime);
-
-        return newVelocity;
-    }
 }
