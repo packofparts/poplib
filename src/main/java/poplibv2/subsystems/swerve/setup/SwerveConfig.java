@@ -18,20 +18,21 @@ public class SwerveConfig {
 
     /**
      * Creates a new SwerveConfig that can be used to create a new Swerve Drivetrain
-     * @param moduleConstants [Top Left, Top Right, Bottom Left, Bottom Right]
-     * @param CANBus
-     * @param driveMotorType
-     * @param rotMotorType
-     * @param drivePidConfig
-     * @param rotPidConfig
-     * @param driveCurrentLimit
-     * @param rotCurrentLimit
-     * @param type
-     * @param wheelDiameter the wheel radius in inches, default is 4
-     * @param gyroConfig
-     * @param cameraConfigs
-     * @param limelightConfigs
-     * @return
+     * @param moduleConstants SwerveModuleConstants objects that describe the swerve module. Should be ordered as: [Top Left, Top Right, Bottom Left, Bottom Right]
+     * @param CANBus What CANBus everything is on
+     * @param driveMotorType The MotorVendor of all of your drive motors
+     * @param rotMotorType The MotorVendor of all of your rotation motors
+     * @param drivePidConfig The PID Config for your drive motors
+     * @param rotPidConfig The PID Config for your rotation motors
+     * @param driveCurrentLimit The current limit of your drive motors
+     * @param rotCurrentLimit The current limit of your rotation motors
+     * @param type The type of swerve module you are using
+     * @param wheelDiameter The wheel diameter in inches, default is 4
+     * @param gyroConfig The config used to create a Gyro
+     * @param cameraConfigs The configs for creating Cameras
+     * @param limelightConfigs The configs for creating Limelights
+     * @param tuningEnabled Whether or not to enable tuning
+     * @return The final SwerveConfig to be passed in when creating a new Swerve
      */
     public static SwerveConfig generateConfig(
         SwerveModuleConstants[] moduleConstants,
@@ -48,7 +49,7 @@ public class SwerveConfig {
         PigeonConfig gyroConfig, 
         CameraConfig[] cameraConfigs,
         LimelightConfig[] limelightConfigs,
-        boolean tuningMode) {
+        boolean tuningEnabled) {
         
         if (moduleConstants.length != 4) {
             DriverStation.reportError("THERE ARE NOT 4 SWERVE MODULES!!!!!!!!!!!!!!! IM SCREAMING!!!! THIS WILL CRASH STUFF!!!!!", false);
@@ -69,8 +70,7 @@ public class SwerveConfig {
             CANCoderConfig canCoderConfig = new CANCoderConfig(moduleConstants[i].absEncCANID, CANBus, moduleConstants[i].absEncOffset, false);
             moduleConfigs[i] = new SwerveModuleConfig(driveMotorConfig, rotMotorConfig, canCoderConfig, i, type.maxSpeed, type.maxAngularVelocity);
         }
-        tuningEnable = tuningMode;
-        return new SwerveConfig(moduleConfigs, gyroConfig, wheelDiameter, cameraConfigs, limelightConfigs, wheelPosForSDK);
+        return new SwerveConfig(moduleConfigs, gyroConfig, wheelDiameter, cameraConfigs, limelightConfigs, wheelPosForSDK, tuningEnabled);
     }
 
     public SwerveModuleConfig[] swerveModuleConfigs;
@@ -81,14 +81,26 @@ public class SwerveConfig {
     public static boolean tuningEnable;
     public Translation2d[] wheelPos;
 
-    public SwerveConfig(SwerveModuleConfig[] swerveModuleConfigs, 
+    /**
+     * INTERNAL POPLIB FUNCTION.
+     * 
+     * USE THE generateConfig to create a new config
+     * @param swerveModuleConfigs
+     * @param gyro
+     * @param wheelDiameter
+     * @param cameraConfigs
+     * @param limelightConfigs
+     * @param wheelPos
+     */
+    private SwerveConfig(SwerveModuleConfig[] swerveModuleConfigs, 
         PigeonConfig gyro, double wheelDiameter, CameraConfig[] cameraConfigs, 
-        LimelightConfig[] limelightConfigs, Translation2d[] wheelPos) {
+        LimelightConfig[] limelightConfigs, Translation2d[] wheelPos, boolean tuningEnabled) {
         wheelCircumference = Units.Inches.of(wheelDiameter).times(Math.PI);
         this.swerveModuleConfigs = swerveModuleConfigs;
         this.gyro = gyro;
         this.cameraConfigs = cameraConfigs;
         this.limelightConfigs = limelightConfigs;
         this.wheelPos = wheelPos;
+        tuningEnable = tuningEnabled;
     }
 }

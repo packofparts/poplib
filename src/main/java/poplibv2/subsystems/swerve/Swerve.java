@@ -2,7 +2,6 @@ package poplibv2.subsystems.swerve;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -44,13 +43,18 @@ public class Swerve extends SubsystemBase {
     public Field2d field;
     public Pose2d prevPose;
     public double prevPoseTimeStamp;
-    private LinearVelocity maxSpeed;
-    private AngularVelocity maxAngularVelocity;
+    public LinearVelocity maxSpeed;
+    public AngularVelocity maxAngularVelocity;
     private PIDTuning driveMotorTuning;
     private PIDTuning rotMotorTuning;
     private SwerveDriveKinematics kinematics;
     private SwerveDrivePoseEstimator odometry;
 
+    /**
+     * Creates a new Swerve Drivetrain, and zeros all of the wheels.
+     * Sets up all of the swerve things.
+     * @param config
+     */
     public Swerve(SwerveConfig config) {
         wheels = new SwerveModule[4];
         for (int i = 0; i < 4; i++) {
@@ -91,22 +95,33 @@ public class Swerve extends SubsystemBase {
         log();
     }
 
+    /**
+     * Updates the PID Constants of each of the swerve module motors
+     */
     private void updatePID() {
         for (int i = 0; i < 4; i++) {
             wheels[i].updatePID(driveMotorTuning, rotMotorTuning);
         }
     }
 
+    /**
+     * LOG EVERYTHING. (this will come in handy later so we can blame electrical).
+     */
     private void log() {
         SmartDashboard.putNumber("Angle", MathUtil.inputModulus(gyro.getNormalizedAngle().in(Units.Degrees), 0, 360));
         SmartDashboard.putNumber("Robot Angle Velo", getAngleVelo());
         SmartDashboard.putNumber("Robot Velo", getDriveVelo());
+        SmartDashboard.putData("Field2d", field);
         for (int i = 0; i < 4; i++) {
             wheels[i].log();
         }
     }
 
+    /**
+     * Updates the odometry using encoder and vision based methods.
+     */
     private void updateOdom() {
+        odometry.update(gyro.getNormalizedRotation2dAngle(), getModulePositions());
         for (int i = 0; i < cameras.length; i++) {
             Optional<EstimatedRobotPose> estimatedPose = cameras[i].getEstimatedPose(getRobotPose());
             if (estimatedPose.isPresent()) {
@@ -115,9 +130,12 @@ public class Swerve extends SubsystemBase {
                                               cameras[i].getVisionStdDevs());
             }
         }
-        odometry.update(gyro.getNormalizedRotation2dAngle(), getModulePositions());
     }
 
+    /**
+     * Drives the robot oriented and applies desaturation
+     * @param states
+     */
     private void driveRobotOriented(SwerveModuleState[] states) {
         desaturateWheelSpeeds(states, maxSpeed.in(Units.MetersPerSecond));
         for (int i = 0; i < 4; i++) {
@@ -125,11 +143,20 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    /**
+     * Drives the robot (as robot oriented)
+     * @param vector (The forward/back and left/right speeds to drive in meters per second)
+     * @param rot The speed to turn in radians per second
+     */
     public void driveRobotOriented(Translation2d vector, double rot) {
         SwerveModuleState[] states = this.kinematics.toSwerveModuleStates(new ChassisSpeeds(vector.getX(), vector.getY(), rot));
         this.driveRobotOriented(states);
     }
   
+    /**
+     * Drives the robot (as robot oriented)
+     * @param chassisSpeeds The speeds to follow
+     */
     public void driveRobotOriented(ChassisSpeeds chassisSpeeds) {
         SwerveModuleState[] states = this.kinematics.toSwerveModuleStates(chassisSpeeds);
         this.driveRobotOriented(states);
@@ -137,6 +164,12 @@ public class Swerve extends SubsystemBase {
     
     // Vector is in mps, and rot is in radians per sec
     // Also this is field oriented
+    /**
+     * Drives the robot as field oriented
+     * @param vector (The forward/back and left/right speeds to drive as a percent of the drivebases max speed (a number from -1.0 to 1.0))
+     * @param rot The rotational speed to drive as a percent of the drivebases max rotational speed (a number from -1.0 to 1.0)
+     * @param color I swear I'm not racist it matters
+     */
     public void drive(Translation2d vector, double rot, Alliance color) {
         vector = vector.times(maxSpeed.in(Units.MetersPerSecond));
         rot *= maxAngularVelocity.in(Units.RadiansPerSecond);
@@ -148,6 +181,11 @@ public class Swerve extends SubsystemBase {
         driveRobotOriented(vector, rot);
     }
 
+    /**
+     * Caps the wheel speeds once they are over the maximum wheel speed that the motors can handle
+     * @param states
+     * @param maxSpeed
+     */
     public void desaturateWheelSpeeds(SwerveModuleState[] states, double maxSpeed) {
         double realMaxSpeed = Collections.max(Arrays.asList(states)).speedMetersPerSecond;
 
@@ -159,6 +197,10 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    /**
+     * Gets an array of the wheel positions
+     * @return An array of SwerveModulePositions
+     */
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
@@ -167,53 +209,91 @@ public class Swerve extends SubsystemBase {
         return positions;
     }
 
+    /**
+     * Gets the current robot estimated pose
+     * @return the pose
+     */
     public Pose2d getRobotPose() {
         return odometry.getEstimatedPosition();
     }
 
+    /**
+     * Updates the previous pose, used for drive and angle velocity calculations
+     */
     private void updatePrevPose() {
         prevPose = odometry.getEstimatedPosition();
         prevPoseTimeStamp = System.currentTimeMillis();
     }
 
+    /**
+     * Rezeros all wheels to thier absolute encoders
+     */
     public void rezeroAllWheels() {
         for (int i = 0; i < 4; i++) {
             wheels[i].resetToAbsolute();
         }
     }
     
+    /**
+     * Runs the drive motors at a specific voltage
+     * @param voltage
+     */
     public void runSysIdRoutine(Voltage voltage) {
         for (int i = 0; i < 4; i++) {
             wheels[i].runSysIdRoutine(voltage.in(Units.Volts));
         }
     }
 
+    /**
+     * Gets logs from the motors
+     * @param log
+     */
     public void sysIdLogMotors(SysIdRoutineLog log) {
         for (int i = 0; i < 4; i++) {
-            wheels[i].log();
+            wheels[i].logSysId(log);
         }
     }
 
-        public void resetGyro() {
+    /**
+     * Zeros the gyro.
+     */
+    public void resetGyro() {
         gyro.zeroGyro();
     }
 
+    /**
+     * A command to zero the gyro
+     * @return
+     */
     public Command resetGyroCommand() {
         return runOnce(() -> {
             resetGyro();
         });
     }
 
+    /**
+     * Gets the angluar velocity of the robot in radians per millisecond
+     * @return
+     */
     public double getAngleVelo() {
         return 1000 * (getRobotPose().getRotation().getRadians() - prevPose.getRotation().getRadians())
                 / (System.currentTimeMillis() - prevPoseTimeStamp); // in radians per milisecond
     }
 
+    /**
+     * Gets the velocity of the robot in meters per millisecond
+     * @return
+     */
     public double getDriveVelo() {
         return 1000 * (getRobotPose().getTranslation().getNorm() - prevPose.getTranslation().getNorm())
                 / (System.currentTimeMillis() - prevPoseTimeStamp); // in meters per milisecond
     }
 
+    /**
+     * Based on whether an object is detected using a limelight, adjusts the driver input to move closer to the object 
+     * @param driverInput
+     * @return the new driver input
+     */
     public Transform2d addVisionMovementAdjustment(Transform2d driverInput) {
         DetectedObject bestDetection = null;
         double bestArea = -1.0;

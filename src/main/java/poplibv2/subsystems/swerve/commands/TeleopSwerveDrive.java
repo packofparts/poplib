@@ -5,6 +5,7 @@ import poplibv2.controllers.ControllerMath;
 import poplibv2.controllers.io.IO;
 import poplibv2.subsystems.swerve.Swerve;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -21,7 +22,12 @@ public class TeleopSwerveDrive extends Command {
     private final double speedMultiplier;
     private final double stickDeadBand;
 
-
+    /**
+     * Creates a command to drive swerve in Teleop.
+     * @param swerve The swerve subsystem.
+     * @param io The Controller
+     * @param speedMultiplier The amount to multiply the inputs by. Use a lower value for "baby mode" (aka when PR wants to drive the robot)
+     */
     public TeleopSwerveDrive(Swerve swerve, IO io, double speedMultiplier) {
         this.swerve = swerve;
         this.xAxisSupplier =  io::getDriveTrainTranslationX;
@@ -31,8 +37,6 @@ public class TeleopSwerveDrive extends Command {
         this.stickDeadBand = IO.DEADBAND;        
         addRequirements(swerve);
     }
-
-
 
     @Override
     public void execute() {

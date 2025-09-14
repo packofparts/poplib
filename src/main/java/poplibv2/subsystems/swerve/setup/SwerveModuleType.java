@@ -4,6 +4,9 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 
+/**
+ * A enum that describes constants for the different types of swerve modules
+ */
 public enum SwerveModuleType {
     MK4iL3(
         (150.0 / 7.0), 

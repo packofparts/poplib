@@ -1,20 +1,20 @@
-package poplibv2.subsystems.swerve.commands;
+package poplibv2.subsystems.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import poplibv2.subsystems.swerve.Swerve;
 
-public class SysIdSwerve {
+public class SysIdElevator {
     SysIdRoutine routine;
     
     /**
-     * Runs a System Identification on swerve which can be used to find kF (kV) constants for drive motors
-     * @param swerve the Swerve Subsystem
+     * Runs a System Identification on the elevator which can be used to find kF (kV) constants for drive motors
+     * @param Elevator the Elevator Subsystem
      */
-    public SysIdSwerve(Swerve swerve) {
+    public SysIdElevator(Elevator elevator) {
         routine = new SysIdRoutine(
             new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(swerve::runSysIdRoutine, swerve::sysIdLogMotors, swerve, "Swerve")
+            new SysIdRoutine.Mechanism(elevator::runSysIdRoutine, elevator::sysIdLogMotors, elevator, "Elevator")
         );
     }
 
@@ -25,4 +25,5 @@ public class SysIdSwerve {
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return routine.dynamic(direction);
     }
+
 }

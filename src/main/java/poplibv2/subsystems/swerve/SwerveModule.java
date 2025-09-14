@@ -167,14 +167,26 @@ public class SwerveModule {
         return MathUtil.inputModulus(encoder.getPosition().getDegrees(), 0, 360);
     }
 
+    /**
+     * Gets the state of the wheel
+     * @return
+     */
     public SwerveModuleState getState() {
         return new SwerveModuleState(getVelocity(), getRotation2dAngle());
     }
 
+    /**
+     * Gets the pose of the swerve module
+     * @return
+     */
     public SwerveModulePosition getPose() {
         return new SwerveModulePosition(getDrivePosition(), getRotation2dAngle());
     }
 
+    /**
+     * Essientially runs the swerve module, given a swerve module state
+     * @param state the SwerveModuleState
+     */
     public void setDesiredState(SwerveModuleState state) {
         state.optimize(getRotation2dAngle());
         state.speedMetersPerSecond *= state.angle.minus(getRotation2dAngle()).getCos();
@@ -187,6 +199,10 @@ public class SwerveModule {
         applySwerveModuleState(rotationsPerMinute, state.angle);
     }
 
+    /**
+     * Applies a voltage to the drive motor.
+     * @param voltage
+     */
     public void runSysIdRoutine(double voltage) {
         driveMotor.setVoltage(voltage);
         rotMotor.setTargetPosition(0.0);
