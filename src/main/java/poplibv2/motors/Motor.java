@@ -133,7 +133,7 @@ public class Motor {
      * @param position the desired position of the motor. This will already include any calulations done in ConversionConfig 
      * @param feedforwardOutput the output you get from doing something like feedforwardController.calculate(velocity)
      * @param enableFOC whether or not to use FOC.
-     * @throws IncorrectUseOfPIDException
+     * @throws IncorrectUseOfPIDException except not really its just printed in DriverStation
      */
     public void setTargetPosition(double position, double feedforwardOutput, boolean enableFOC) {
         checkForPID();
