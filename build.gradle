@@ -8,7 +8,12 @@ plugins {
 
 import java.util.regex.Matcher
 
-def getVersionFromGitTag() {
+def getVersion() {
+    def build_name = System.getenv("BUILD_NAME")
+    if (build_name != null) {
+        return build_name
+    }
+
     def tags = providers.exec {
       commandLine("git", "tag", "--list", "v*", "--sort=-v:refname")
     }.standardOutput.asText.get()
@@ -17,7 +22,7 @@ def getVersionFromGitTag() {
     return tags.split("\n")[0].substring(1) 
 }
 
-project.version = getVersionFromGitTag()
+project.version = getVersion()
 println "Project version set to ${project.version}"
 
 java {

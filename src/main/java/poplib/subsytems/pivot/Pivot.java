@@ -34,7 +34,7 @@ public abstract class Pivot extends SubsystemBase {
     public abstract void resetToAbsolutePosition();
 
     public double getAbsolutePosition() {
-        return absoluteEncoder.getPosition().getDegrees();
+        return absoluteEncoder.getDegreeNormalizedPosition();
     }
 
     public void log() {

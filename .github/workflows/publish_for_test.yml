@@ -1,0 +1,37 @@
+name: Test Package Publishing
+
+on: 
+  workflow_dispatch:
+    inputs:
+      buildName:
+        description: 'Build Name'     
+        required: true
+        default: ''
+
+jobs:
+  publish:
+    name: Test Package Publishing
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    - name: Checking out Code
+      uses: actions/checkout@v4
+
+    - name: Setting up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    - name: Building and Publishing
+      run: |
+        ./gradlew clean build
+        ./gradlew publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BUILD_NAME: ${{ github.event.inputs.buildName }}

@@ -8,17 +8,18 @@ import poplib.motor.FollowerConfig;
 import poplib.motor.MotorConfig;
 import poplib.sensors.absolute_encoder.AbsoluteEncoderConfig;
 import poplib.smart_dashboard.PIDTuning;
+import poplib.subsytems.pivot.Pivot;
 
 public class TalonPivot extends Pivot {
     public final TalonFX leadMotor;
-    @SuppressWarnings("unused")
-    private final TalonFX followerMotor;
-    private final PIDTuning pid;
-    private final PositionDutyCycle position;
+    protected TalonFX followerMotor;
+    protected PIDTuning pid;
+    protected PositionDutyCycle position;
 
     public TalonPivot(MotorConfig leadConfig, FollowerConfig followerConfig, double gearRatio, FFConfig ffConfig, AbsoluteEncoderConfig absoluteConfig, boolean tuningMode, String subsytemName) {
         super(ffConfig, absoluteConfig, tuningMode, subsytemName);
         leadMotor = leadConfig.createTalon();
+
         if (followerConfig != null) {
             followerMotor = followerConfig.createTalon();
         } else {
@@ -31,7 +32,6 @@ public class TalonPivot extends Pivot {
 
         leadMotor.setPosition(0.0);
 
-        resetToAbsolutePosition();
     }
 
     public boolean atSetpoint(double error, double setpoint) {
@@ -56,6 +56,10 @@ public class TalonPivot extends Pivot {
     public void periodic() {
         pid.updatePID(leadMotor);
         leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.ff.getKg()));
+        leadMotor.setControl(position.withPosition(super.setpoint.get()).withFeedForward(super.ff.calculate(
+            Math.toRadians(leadMotor.getPosition().getValueAsDouble()),
+            0.0
+        )));
     }
 
     @Override
