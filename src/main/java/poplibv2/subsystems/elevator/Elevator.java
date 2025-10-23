@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public abstract class Elevator extends SubsystemBase{
-    private final TunableNumber setpoint;
+    private TunableNumber setpoint;
     private PIDTuning tuning;
     private ElevatorFeedforward feedforward;
     private TrapezoidProfile setPointCalc;
@@ -36,6 +36,7 @@ public abstract class Elevator extends SubsystemBase{
      * @param rotationToMeters how many meters the elevator goes up when the motors are driven 1 rotation
      * @param maxVelocity in Meters/s
      * @param maxAcceleration in Meters/s/s
+     * @param maxExtension in Meters
      * @param tuningMode whether or not to allow PID and setpoint tuning
      * @param subsytemName the name of the subsystem, for logging
      */
