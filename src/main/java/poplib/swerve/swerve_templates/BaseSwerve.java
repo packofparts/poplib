@@ -39,9 +39,6 @@ abstract public class BaseSwerve extends SubsystemBase {
     protected PIDTuning angleTuning;
     protected PIDTuning driveTuning;
 
-    private Translation2d lastTranslationVector;
-    private double lastTranslationVectorTime;
-
     public static final double MAX_SKID_ACCEL = 100.0;
     public static final double MAX_X_TILT_ACCEL = 100.0;    
     public static final double MAX_Y_TILT_ACCEL = 0.5;
@@ -59,9 +56,6 @@ abstract public class BaseSwerve extends SubsystemBase {
         this.maxSpeed = swerveMods[0].swerveModuleConstants.moduleInfo.maxSpeed.in(Units.MetersPerSecond);
         this.maxAngularVelocity = swerveMods[0].swerveModuleConstants.moduleInfo.maxAngularVelocity.in(Units.RadiansPerSecond);
 
-        lastTranslationVector = new Translation2d();
-        lastTranslationVectorTime = Timer.getFPGATimestamp();
-
         angleTuning = new PIDTuning("Swerve Angle", swerveMods[0].swerveModuleConstants.angleConfig.pid,  swerveMods[0].swerveModuleConstants.swerveTuningMode);
         driveTuning = new PIDTuning("Swerve Drive",  swerveMods[0].swerveModuleConstants.driveConfig.pid,  swerveMods[0].swerveModuleConstants.swerveTuningMode);
 
@@ -78,28 +72,6 @@ abstract public class BaseSwerve extends SubsystemBase {
     }
 
     public abstract void driveRobotOriented(Translation2d vector, double rot);
-
-    public Translation2d accelrationLimit(Translation2d wantedVelcotiy) {
-        Translation2d delta = wantedVelcotiy.minus(lastTranslationVector);
-        double ellapsedTime = Timer.getFPGATimestamp() - lastTranslationVectorTime;
-        lastTranslationVectorTime += ellapsedTime;
-        
-        if (delta.getNorm() > MAX_SKID_ACCEL * ellapsedTime) {
-            delta = delta.div(delta.getNorm() / (MAX_SKID_ACCEL * ellapsedTime));
-        }
-
-        if (delta.getX() > MAX_X_TILT_ACCEL * ellapsedTime) {
-            delta = new Translation2d(MAX_X_TILT_ACCEL * ellapsedTime, delta.getY());
-        }
-
-        if (delta.getY() > MAX_Y_TILT_ACCEL * ellapsedTime) {
-            delta = new Translation2d(delta.getX(), MAX_Y_TILT_ACCEL * ellapsedTime);
-        }
-
-        lastTranslationVector = delta;
-
-        return null;
-    }
 
     public void driveRobotOriented(SwerveModuleState[] states) {
         desaturateWheelSpeeds(states, maxSpeed);
