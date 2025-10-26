@@ -84,7 +84,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
-        SONAR_PROJECT_KEY: poplib
+        SONAR_PROJECT_KEY: packofparts_poplib
         SONAR_ORGANIZATION: packofparts
         PACKAGE_FETCH_ACTOR: ${{ github.actor }}
         PACKAGE_FETCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
