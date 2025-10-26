@@ -39,7 +39,7 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: java
-  
+
     - name: Building
       run: ./gradlew build --info
       env:
@@ -54,6 +54,8 @@ jobs:
   sonar:
     name: Sonar Analysis
     runs-on: ubuntu-latest
+    # Only run Sonar for PRs from the same repository or when a SONAR_TOKEN secret exists.
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository || secrets.SONAR_TOKEN != '' }}
 
     steps:
     - name: Checking out Code
@@ -70,7 +72,27 @@ jobs:
 
     - name: Setting up Gradle
       uses: gradle/actions/setup-gradle@v4
-  
+
+    - name: Check SONAR_TOKEN presence and validate
+      # This step never prints the token itself. It will print "found key" if the token is present and valid.
+      run: |
+        # If secret is not present, fail early.
+        if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+          echo "SONAR_TOKEN not set"
+          exit 1
+        fi
+
+        # Validate token against SonarCloud authentication endpoint.
+        # GitHub redacts secrets in logs; we only inspect the HTTP status code.
+        status=$(curl -sS -u "${{ secrets.SONAR_TOKEN }}:" -o /dev/null -w "%{http_code}" "https://sonarcloud.io/api/authentication/validate" || echo "000")
+
+        if [ "$status" = "200" ]; then
+          echo "found key"
+        else
+          echo "ERROR: SONAR_TOKEN appears invalid (HTTP $status)"
+          exit 1
+        fi
+
     - name: Caching SonarQube packages
       uses: actions/cache@v4
       with:
@@ -79,10 +101,15 @@ jobs:
         restore-keys: ${{ runner.os }}-sonar
 
     - name: Building and Analyzing
-      run: >
-        ./gradlew -Dsonar.projectKey=poplib -Dsonar.organization=packofparts -Dsonar.host.url=https://sonarcloud.io build sonar --info --stacktrace
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         PACKAGE_FETCH_ACTOR: ${{ github.actor }}
         PACKAGE_FETCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: >
+        ./gradlew \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.projectKey=poplib \
+          -Dsonar.organization=packofparts \
+          -Dsonar.host.url=https://sonarcloud.io \
+          build sonar --info --stacktrace -Dsonar.verbose=true
