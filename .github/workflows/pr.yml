@@ -12,7 +12,7 @@ jobs:
     permissions:
       actions: read
       contents: write
-      security-events: write
+      security-events: write 
 
     strategy:
       fail-fast: false
