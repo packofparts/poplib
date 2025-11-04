@@ -12,7 +12,7 @@ jobs:
     permissions:
       actions: read
       contents: write
-      security-events: write
+      security-events: write 
 
     strategy:
       fail-fast: false
@@ -83,5 +83,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io
         PACKAGE_FETCH_ACTOR: ${{ github.actor }}
         PACKAGE_FETCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
